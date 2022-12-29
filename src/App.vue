@@ -1,90 +1,60 @@
 <script setup>
-  import  VocabTable from 'vue3-easy-data-table' ;
+  import { ref, computed } from 'vue';
+  import  VocabTableView from './views/VocabTableView.vue' ;
+  import FlashCardView from './views/FlashCardView.vue';
+  import SettingsView from './views/SettingsView.vue';
+  import AvailableLanguagesView from './views/AvailableLanguagesView.vue';
 
-  const headers = [
-    { text: "English", value: "english", sortable: true },
-    { text: "Italian", value: "italian", sortable: true }
-  ];
+  let currentTab = ref("Available Languages");
 
-  const items = [
-    { "english": "the man", "italian": "l'uomo" },
-    { "english": "the woman", "italian": "la donna" },
-    { "english": "the duck", "italian": "l'anatra" },
-    { "english": "everywhere", "italian": "ovunque" },
-    { "english": "the shark", "italian": "lo squalo" },
-    { "english": "in the afternoon", "italian": "di pomeriggio" },
-    { "english": "today", "italian": "oggie" },
-    { "english": "nothing", "italian": "non niente" },
-  ];
+  const compMap = {
+    "Available Languages": AvailableLanguagesView,
+    "Saved Vocabulary": VocabTableView,
+    "Flash Cards": FlashCardView,
+    "Settings": SettingsView
+  }
+
+  const tabs = Object.keys(compMap);
+
+  const currentTabComponent = computed(() => {
+    return compMap[currentTab.value]
+  })
 </script>
 
 <template>
-  <VocabTable
-    :headers="headers"
-    :items="items"
-  />
+  <div id="dynamic-component-demo" class="demo">
+      <button
+        v-for="tab in tabs"
+        v-bind:key="tab"
+        v-bind:class="['tab-button', { active: currentTab === tab }]"
+        v-on:click="currentTab = tab"
+      >
+        {{ tab }}
+      </button>
+
+      <component v-bind:is="currentTabComponent" class="tab"></component>
+    </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.tab-button {
+  padding: 6px 10px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #f0f0f0;
+  margin-bottom: -1px;
+  margin-right: -1px;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.tab-button:hover {
+  background: #e0e0e0;
 }
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.tab-button.active {
+  background: #e0e0e0;
 }
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.tab {
+  border: 1px solid #ccc;
+  padding: 10px;
 }
 </style>
