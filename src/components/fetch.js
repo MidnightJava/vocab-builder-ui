@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 
 export function useFetch(url) {
-  let data = null
+  const data = ref(null)
   const error = ref(null)
 
   fetch(url, {
@@ -12,7 +12,7 @@ export function useFetch(url) {
   })
     .then((res) => res.json())
     .then((json) => {
-        data = json
+        data.value = json
     })
     .catch((err) => {
         error.value = err
