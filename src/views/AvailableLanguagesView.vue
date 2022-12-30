@@ -1,25 +1,27 @@
 <script setup>
-import { useFetch } from '../components/fetch.js'
 
+import { inject } from 'vue'
 import  LangsTable from 'vue3-easy-data-table' ;
 
 const headers = [
+  { text: "ID", value: "id", sortable: true },
   { text: "Name", value: "name", sortable: true },
-  { text: "ID", value: "id", sortable: true }
+  { text: "Native Name", value: "nativeName", sortable: true },
 ];
 
-const { data } = useFetch('http://localhost:5000/languages')
-// let dataVal = data.value;
+const getItems = (data) => {
+  const _data = data.value || [];
+  return Object.keys(_data).map(id => 
+    ({id, name: _data[id]["name"], nativeName: _data[id]["nativeName"]})
+  )
+}
 
-const _data = [
-  {"name": "English", "id": "en"},
-]
 </script>
 
 <template>
  <LangsTable
   :headers="headers"
-  :items=_data
+  :items="getItems(inject('langs'))"
  />
 </template>
 

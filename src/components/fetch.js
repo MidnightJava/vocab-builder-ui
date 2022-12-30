@@ -4,12 +4,7 @@ export function useFetch(url) {
   const data = ref(null)
   const error = ref(null)
 
-  fetch(url, {
-    method: "GET",
-    headers: {
-        "Accept": "application/json"
-    }
-  })
+  fetch(url)
     .then((res) => res.json())
     .then((json) => {
         data.value = json

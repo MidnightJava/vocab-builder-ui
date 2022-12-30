@@ -1,5 +1,6 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, provide } from 'vue';
+  import { useFetch } from './components/fetch.js'
   import  VocabTableView from './views/VocabTableView.vue' ;
   import FlashCardView from './views/FlashCardView.vue';
   import SettingsView from './views/SettingsView.vue';
@@ -15,6 +16,8 @@
   }
 
   const tabs = Object.keys(compMap);
+  const { data } = useFetch('http://localhost:5000/languages')
+  provide("langs", data)
 
   const currentTabComponent = computed(() => {
     return compMap[currentTab.value]
