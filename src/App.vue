@@ -8,6 +8,16 @@
 
   let currentTab = ref("Available Languages");
 
+  const langs = ref(null);
+  const vocab = ref(null);
+  const err = ref(null);
+  provide("langs", langs);
+  provide("vocab", vocab);
+
+
+  provide("fromLang", "English")
+  provide("toLang", "Italian")
+
   const compMap = {
     "Available Languages": AvailableLanguagesView,
     "Saved Vocabulary": VocabTableView,
@@ -16,8 +26,10 @@
   }
 
   const tabs = Object.keys(compMap);
-  const { data } = useFetch('http://localhost:5000/languages')
-  provide("langs", data)
+  useFetch('http://localhost:5000/init?from_lang=en&to_lang=it', ref(), ref(), () => {
+   useFetch('http://localhost:5000/languages', langs, err);
+   useFetch('http://localhost:5000/vocab', vocab, err);
+  })
 
   const currentTabComponent = computed(() => {
     return compMap[currentTab.value]

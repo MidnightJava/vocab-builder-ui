@@ -1,27 +1,34 @@
 <script setup>
+  import { inject, computed } from 'vue';
   import  VocabTable from 'vue3-easy-data-table' ;
 
+  const fromLang = inject("fromLang");
+  const toLang = inject("toLang");
+  const vocab = inject('vocab');
+
   const headers = [
-    { text: "English", value: "english", sortable: true },
-    { text: "Italian", value: "italian", sortable: true }
+    { text: fromLang, value: fromLang.toLowerCase(), sortable: true },
+    { text: toLang, value: toLang.toLowerCase(), sortable: true }
   ];
 
-  const items = [
-    { "english": "the man", "italian": "l'uomo" },
-    { "english": "the woman", "italian": "la donna" },
-    { "english": "the duck", "italian": "l'anatra" },
-    { "english": "everywhere", "italian": "ovunque" },
-    { "english": "the shark", "italian": "lo squalo" },
-    { "english": "in the afternoon", "italian": "di pomeriggio" },
-    { "english": "today", "italian": "oggie" },
-    { "english": "nothing", "italian": "non niente" },
-  ];
+  const getItems = computed( () => {
+    if (vocab) {
+      const data = vocab.value || {};
+      return Object.entries(data).map((entry) => {
+        return {[toLang.toLowerCase()]: entry[0], [fromLang.toLowerCase()]: entry[1].translations }
+      })
+    } else {
+      return []
+    }
+    
+  })
+
 </script>
 
 <template>
     <VocabTable
       :headers="headers"
-      :items="items"
+      :items="getItems"
     />
 </template>
 

@@ -1,6 +1,6 @@
 <script setup>
 
-import { inject } from 'vue'
+import { inject, computed } from 'vue'
 import  LangsTable from 'vue3-easy-data-table' ;
 
 const headers = [
@@ -9,19 +9,26 @@ const headers = [
   { text: "Native Name", value: "nativeName", sortable: true },
 ];
 
-const getItems = (data) => {
-  const _data = data.value || [];
-  return Object.keys(_data).map(id => 
-    ({id, name: _data[id]["name"], nativeName: _data[id]["nativeName"]})
-  )
-}
+const data = inject("langs")
+
+const getItems = computed( () => {
+  if (data) {
+    const _data = data.value || [];
+    return Object.keys(_data).map(id => 
+      ({id, name: _data[id]["name"], nativeName: _data[id]["nativeName"]})
+    )
+  } else {
+    return []
+  }
+  
+})
 
 </script>
 
 <template>
  <LangsTable
   :headers="headers"
-  :items="getItems(inject('langs'))"
+  :items="getItems"
  />
 </template>
 
