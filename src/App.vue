@@ -48,10 +48,11 @@
       </button>
 
       <component v-bind:is="currentTabComponent" class="tab"></component>
-    </div>
+  </div>
 </template>
 
 <style scoped>
+
 .tab-button {
   padding: 6px 10px;
   border-top-left-radius: 3px;
@@ -69,7 +70,14 @@
   background: #e0e0e0;
 }
 .tab {
-  border: 1px solid #ccc;
   padding: 10px;
+}
+.demo {
+  height: 80%;
+  /* width: 50%; */
+  padding-top: 50px;
+  padding-bottom: 50px;
+  margin-left: 25%;
+  /* margin-right: auto; */
 }
 </style>

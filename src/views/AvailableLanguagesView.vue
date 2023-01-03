@@ -1,6 +1,6 @@
 <script setup>
 
-import { inject, computed } from 'vue'
+import { inject, computed, ref } from 'vue'
 import  LangsTable from 'vue3-easy-data-table' ;
 
 const headers = [
@@ -23,14 +23,38 @@ const getItems = computed( () => {
   
 })
 
+const searchValue = ref();
+
 </script>
 
 <template>
- <LangsTable
-  :headers="headers"
-  :items="getItems"
- />
+  <div class="float-container">
+    <div class="float-child">
+      <LangsTable
+        :headers="headers"
+        :items="getItems"
+        :rows-items=[20,30,50]
+        :rows-per-page="20"
+        :search-value="searchValue"
+        dense
+      />
+    </div>
+    <div class="float-child">
+      <span>Search: </span>
+      <input type="text" v-model="searchValue" />
+    </div>
+</div>
 </template>
 
 <style>
+.float-container {
+    border: 3px solid #fff;
+    padding: 20px;
+}
+
+.float-child {
+    width: 400px;
+    float: left;
+    padding: 20px;
+}  
 </style>
