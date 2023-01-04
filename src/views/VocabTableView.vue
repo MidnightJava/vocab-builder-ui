@@ -24,6 +24,14 @@
   })
 
   const searchValue = ref();
+  const searchField = ref([]);
+  const itemsSelected =  ref([])
+
+  const deleteSelected = () => {
+    itemsSelected.value.forEach( item => {
+    console.log(item)
+  })
+  }
 
 </script>
 
@@ -33,15 +41,23 @@
       <VocabTable
         :headers="headers"
         :items="getItems"
+        v-model:items-selected="itemsSelected"
         :rows-items=[20,30,50]
         :rows-per-page="20"
         :search-value="searchValue"
+        :search-field="searchField"
         dense
       />
     </div>
     <div class="float-child">
-      <span>Search: </span>
-      <input type="text" v-model="searchValue" />
+      <input type="text" placeholder="Search" v-model="searchValue" />
+      <div>
+        <input type="checkbox" id="fromLangCB" :value="fromLang.toLowerCase()" v-model="searchField" />
+        <label for="fromLangCB">{{ fromLang }} </label>
+        <input type="checkbox" id="toLang" :value="toLang.toLowerCase()" v-model="searchField" />
+        <label for="toLang">{{ toLang }} </label>
+      </div>
+      <button id="deleteSelected" @click="deleteSelected" :disabled="itemsSelected.length == 0">Delete Selected Items</button>
     </div>
   </div>
 </template>
@@ -75,5 +91,10 @@ header {
     place-items: flex-start;
     flex-wrap: wrap;
   }
+
+  #deleteSelected {
+    margin-top: 20px;
+  }
+
 }
 </style>

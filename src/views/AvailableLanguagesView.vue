@@ -24,6 +24,8 @@ const getItems = computed( () => {
 })
 
 const searchValue = ref();
+const searchField = ref([]);
+const itemsSelected =  ref([])
 
 </script>
 
@@ -33,15 +35,24 @@ const searchValue = ref();
       <LangsTable
         :headers="headers"
         :items="getItems"
+        v-model:items-selected="itemsSelected"
         :rows-items=[20,30,50]
         :rows-per-page="20"
         :search-value="searchValue"
+        :search-field="searchField"
         dense
       />
     </div>
     <div class="float-child">
-      <span>Search: </span>
-      <input type="text" v-model="searchValue" />
+      <input type="text" placeholder="Search" v-model="searchValue" />
+      <div>
+        <input type="checkbox" id="idCB" value="id" v-model="searchField" />
+        <label for="idCB">ID </label>
+        <input type="checkbox" id="nameCB" value="name" v-model="searchField" />
+        <label for="nameCB">Name </label>
+        <input type="checkbox" id="nativeNameCB" value="nativeName" v-model="searchField" />
+        <label for="nativeNameCB">Native Name</label>
+      </div>
     </div>
 </div>
 </template>
@@ -57,4 +68,8 @@ const searchValue = ref();
     float: left;
     padding: 20px;
 }  
+
+#deleteSelected {
+    margin-top: 20px;
+}
 </style>
