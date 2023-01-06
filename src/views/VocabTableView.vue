@@ -46,8 +46,8 @@
     item.opts = show;
   }
 
-  const showOpts = () => {
-    console.log("Show Opts")
+  const showOpts = (item) => {
+    console.log("Show Opts " + item.italian)
   }
 
 </script>
@@ -64,9 +64,9 @@
         :search-value="searchValue"
         :search-field="searchField"
         dense>
-        <template #item-opts="{id}" >
-          <font-awesome-icon id="optFa" icon="fa-solid fa-bars" @click="showOpts" v-if="showOpt == id" />
-          <div id="optDiv" v-else @mouseover="() => showOpt = id" @mouseleave="() => showOpt = 0">
+        <template #item-opts="item" >
+          <font-awesome-icon id="optFa" icon="fa-solid fa-bars" @click="() => showOpts(item)" v-if="showOpt == item.id" />
+          <div id="optDiv" v-else @mouseover="() => showOpt = item.id" @mouseleave="() => showOpt = 0">
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           </div>
         </template>
@@ -130,6 +130,7 @@ header {
     z-index: 0;
     margin-left: 10px;
     width: 100%;
+    height: 20px;
   }
 }
 </style>
