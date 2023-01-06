@@ -23,6 +23,8 @@ const getItems = computed( () => {
   
 })
 
+
+
 const searchValue = ref();
 const searchField = ref([]);
 const itemsSelected =  ref([])
@@ -67,7 +69,7 @@ const itemsSelected =  ref([])
     width: 400px;
     float: left;
     padding: 20px;
-}  
+} 
 
 #deleteSelected {
     margin-top: 20px;

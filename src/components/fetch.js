@@ -7,10 +7,7 @@ export function useFetch(url, data, error, method="GET", payload=null, callback=
     opts.headers = {
       'Content-Type': 'application/json',
     }
-    console.log("PAYLOAD " + JSON.stringify(payload));
     opts.body = JSON.stringify(payload);
-
-    console.log(opts)
   }
 
   fetch(url, opts)
