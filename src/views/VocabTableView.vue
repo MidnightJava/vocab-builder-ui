@@ -1,5 +1,6 @@
 <script setup>
   import { inject, computed, ref } from 'vue';
+  import { useFetch } from "../components/fetch.js"
   import  VocabTable from 'vue3-easy-data-table' ;
 
   const fromLang = inject("fromLang");
@@ -30,6 +31,10 @@
   const deleteSelected = () => {
     itemsSelected.value.forEach( item => {
     console.log(item)
+  })
+
+  useFetch('http://localhost:5000/vocab/delete_entry', ref(null), ref(null), "POST", itemsSelected.value, () => {
+    console.log("Deleted ")
   })
   }
 

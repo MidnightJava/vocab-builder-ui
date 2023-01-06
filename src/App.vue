@@ -26,9 +26,9 @@
   }
 
   const tabs = Object.keys(compMap);
-  useFetch('http://localhost:5000/init?from_lang=en&to_lang=it', ref(), ref(), () => {
-   useFetch('http://localhost:5000/languages', langs, err);
-   useFetch('http://localhost:5000/vocab', vocab, err);
+  useFetch('http://localhost:5000/init?from_lang=en&to_lang=it', ref(null), ref(null), "GET", null, () => {
+   useFetch('http://localhost:5000/languages/get', langs, err);
+   useFetch('http://localhost:5000/vocab/get_all', vocab, err);
   })
 
   const currentTabComponent = computed(() => {
