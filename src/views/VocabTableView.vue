@@ -33,6 +33,13 @@
     console.log(item)
   })
 
+  console.log(typeof vocab.value)
+  console.log(vocab.value)
+  for (const item of itemsSelected.value) {
+    // vocab.value.splice(vocab.value.indexOf(item), 1)
+    delete vocab.value[item[toLang.toLowerCase()]]
+  }
+
   useFetch('http://localhost:5000/vocab/delete_entry', ref(null), ref(null), "POST", itemsSelected.value, () => {
     console.log("Deleted ")
   })
