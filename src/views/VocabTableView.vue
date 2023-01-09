@@ -2,6 +2,7 @@
   import { inject, computed, ref } from 'vue';
   import { useFetch } from "../components/fetch.js"
   import  VocabTable from 'vue3-easy-data-table' ;
+  import AddVocab from "./AddVocab.vue";
 
   const fromLang = inject("fromLang");
   const toLang = inject("toLang");
@@ -10,7 +11,7 @@
   const headers = [
     { text: fromLang, value: fromLang.toLowerCase(), sortable: true },
     { text: toLang, value: toLang.toLowerCase(), sortable: true },
-    { text: "", value: "opts", sortable: false }
+    { text: "Action", value: "opts", sortable: false }
   ];
 
   const getItems = computed( () => {
@@ -30,6 +31,7 @@
   const searchField = ref([]);
   const itemsSelected =  ref([]);
   const showOpt = ref(0)
+  const showModal = ref(false);
 
   const deleteSelected = () => {
     for (const item of itemsSelected.value) {
@@ -41,13 +43,16 @@
     })
   }
 
-  const doShowIcon = (show, item) => {
-    console.log("Show icon: " + show)
-    item.opts = show;
+  const deleteEntry = (item) => {
+    useFetch('http://localhost:5000/vocab/delete_entry', ref(null), ref(null), "POST", item, () => {
+      delete vocab.value[item[toLang.toLowerCase()]]
+      console.log("Deleted ")
+    })
+   
   }
 
-  const showOpts = (item) => {
-    console.log("Show Opts " + item.italian)
+  const addEntry = () => {
+    showModal.value = true
   }
 
 </script>
@@ -65,10 +70,15 @@
         :search-field="searchField"
         dense>
         <template #item-opts="item" >
-          <font-awesome-icon id="optFa" icon="fa-solid fa-bars" @click="() => showOpts(item)" v-if="showOpt == item.id" />
-          <div id="optDiv" v-else @mouseover="() => showOpt = item.id" @mouseleave="() => showOpt = 0">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <div @mouseout="() => showOpt = 0" @mouseover="() => showOpt = item.id">
+              <button class="del-button" @click="() => deleteEntry(item)" v-if="showOpt === item.id">
+                Delete
+              </button>
+              <button class="del-button hide" v-else></button>
           </div>
+        </template>
+        <template #header-opts>
+          <font-awesome-icon class="float-right" icon="fa-solid fa-ellipsis" />
         </template>
       </VocabTable>
     </div>
@@ -80,7 +90,8 @@
         <input type="checkbox" id="toLang" :value="toLang.toLowerCase()" v-model="searchField" />
         <label for="toLang">{{ toLang }} </label>
       </div>
-      <button id="deleteSelected" @click="deleteSelected" :disabled="itemsSelected.length == 0">Delete Selected Items</button>
+      <button id="deleteSelected" @click="deleteSelected" :disabled="itemsSelected.length == 0">Delete Selected Entries</button>
+      <AddVocab></AddVocab>
     </div>
   </div>
 </template>
@@ -118,19 +129,19 @@ header {
   #deleteSelected {
     margin-top: 20px;
   }
-  #optDiv {
-    min-width: 5px;
-    width: 100%;
-    height: 100%;
-    display: block;
-    z-index: 10;
+  .del-button {
+    margin-left: 10%;
+    width: 60px;
+    height: 20px;
   }
 
-  #optFa {
-    z-index: 0;
-    margin-left: 10px;
-    width: 100%;
-    height: 20px;
+  .hide {
+    border: none;
+    background-color: inherit;
+  }
+
+  .float-right {
+    margin-left: 35%;
   }
 }
 </style>
