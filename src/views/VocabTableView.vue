@@ -1,8 +1,39 @@
 <script setup>
   import { inject, computed, ref } from 'vue';
+  import { usePagination, useRowsPerPage } from "use-vue3-easy-data-table";
+
   import { useFetch } from "../components/fetch.js"
   import  VocabTable from 'vue3-easy-data-table' ;
   import AddVocab from "./AddVocab.vue";
+
+  const dataTable = ref();
+
+  const rowsPerPage = 15;
+
+  const currentPageNumber = ref(1);
+
+  const {
+    currentPageFirstIndex,
+    currentPageLastIndex,
+    clientItemsLength,
+    maxPaginationNumber,
+    currentPaginationNumber,
+    isFirstPage,
+    isLastPage,
+    nextPage,
+    prevPage,
+    updatePage,
+  } = usePagination(dataTable);
+
+  const {
+    rowsPerPageOptions,
+    rowsPerPageActiveOption,
+    updateRowsPerPageActiveOption,
+  } = useRowsPerPage(dataTable);
+
+  const updateRowsPerPageSelect = (e) => {
+    updateRowsPerPageActiveOption(Number((e.target).value));
+  };
 
   const fromLang = inject("fromLang");
   const toLang = inject("toLang");
@@ -63,14 +94,17 @@
   <div class="float-container">
     <div class="float-child">
       <VocabTable
+        ref="dataTable"
         :headers="headers"
         :items="getItems"
         v-model:items-selected="itemsSelected"
-        :rows-items=[20,30,50]
-        :rows-per-page="20"
+        :rows-per-page="rowsPerPage"
         :search-value="searchValue"
         :search-field="searchField"
-        dense>
+        alternating
+        border-cell
+        hide-footer
+      >
         <template #item-opts="item" >
           <div @mouseout="() => showOpt = 0" @mouseover="() => showOpt = item.id">
               <button class="del-button" @click="() => deleteEntry(item)" v-if="showOpt === item.id">
@@ -83,6 +117,29 @@
           <font-awesome-icon class="float-right" icon="fa-solid fa-ellipsis" />
         </template>
       </VocabTable>
+      <div class="custom-footer">
+        <div class="customize-index">
+          Now displaying: {{currentPageFirstIndex}} ~ {{currentPageLastIndex}} of {{clientItemsLength}}
+        </div>
+
+        <span class="customize-page-input">
+          Go to page
+          <input
+            type="number"
+            min="1" :max="Math.ceil(clientItemsLength/rowsPerPage)"
+            v-model="currentPageNumber"
+            @change="() => {
+              updatePage(currentPageNumber)
+              }"
+          >
+            of {{ Math.ceil(clientItemsLength/rowsPerPage) }}
+        </span>
+      
+        <div class="customize-pagination">
+          <button class="prev-page" @click="() => {currentPageNumber--; prevPage()}" :disabled="isFirstPage">prev page</button>
+          <button class="next-page" @click="() => {currentPageNumber++; nextPage()}" :disabled="isLastPage">next page</button>
+        </div>
+      </div>
     </div>
     <div class="float-child">
       <input type="text" placeholder="Search" v-model="searchValue" />
@@ -135,7 +192,7 @@ header {
     margin-top: 20px;
   }
   .del-button {
-    margin-left: 5px;
+    margin-left: 30px;
     width: 60px;
     height: 20px;
   }
@@ -152,5 +209,53 @@ header {
   button {
     margin-left:5px;
   }
+
+  .custom-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .customize-rows-per-page {
+    align-items: center
+  }
+
+  .customize-rows-per-page > select {
+    text-align: center;
+  }
+
+  .customize-index {
+    flex: 1 1 auto;
+    padding: 10px;
+  }
+
+  .customize-page-input {
+    display: block;
+  }
+
+  .customize-page-input input {
+    width: 30px;
+  }
+
+  .customize-button {
+    cursor: grab;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .customize-button.active {
+    background: rgb(101, 182, 101);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    align-items: center;
+    text-align: center;
+    cursor: default;
+    
+  }
+  
 }
 </style>

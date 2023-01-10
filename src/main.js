@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import 'vue3-easy-data-table/dist/style.css';
-// import "./assets/main.css";
+import "./assets/style.css";
 
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'

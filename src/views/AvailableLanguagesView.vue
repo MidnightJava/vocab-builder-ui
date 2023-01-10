@@ -42,7 +42,8 @@ const itemsSelected =  ref([])
         :rows-per-page="20"
         :search-value="searchValue"
         :search-field="searchField"
-        dense
+        alternating
+        border-cell
       />
     </div>
     <div class="float-child">
