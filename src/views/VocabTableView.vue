@@ -27,11 +27,10 @@
     
   })
 
-  const searchValue = ref();
-  const searchField = ref([]);
+  const searchValue = ref("");
+  const searchField = ref([toLang.toLowerCase(), fromLang.toLowerCase()]);
   const itemsSelected =  ref([]);
   const showOpt = ref(0)
-  const showModal = ref(false);
 
   const deleteSelected = () => {
     for (const item of itemsSelected.value) {
@@ -43,18 +42,21 @@
     })
   }
 
+  const delKey = ref("");
+  const err = ref(null)
   const deleteEntry = (item) => {
-    useFetch('http://localhost:5000/vocab/delete_entry', ref(null), ref(null), "POST", item, () => {
-      delete vocab.value[item[toLang.toLowerCase()]]
-      console.log("Deleted ")
+    useFetch('http://localhost:5000/vocab/delete_entry', delKey, err, "POST", {"key": item[toLang.toLowerCase()]}, () => {
+      if (err.value) {
+        console.log(err.value)
+      } else {
+        let res = delKey.value;
+        delete vocab.value[res['deleted']];
+        console.log(`Deleted ${res['deleted']}`)
+      }
+      
     })
    
   }
-
-  const addEntry = () => {
-    showModal.value = true
-  }
-
 </script>
 
 <template>
@@ -89,9 +91,12 @@
         <label for="fromLangCB">{{ fromLang }} </label>
         <input type="checkbox" id="toLang" :value="toLang.toLowerCase()" v-model="searchField" />
         <label for="toLang">{{ toLang }} </label>
+        <button :disabled="!searchValue.length" @click="searchValue = ''">Clear</button>
       </div>
-      <button id="deleteSelected" @click="deleteSelected" :disabled="itemsSelected.length == 0">Delete Selected Entries</button>
-      <AddVocab></AddVocab>
+      <div>
+        <button id="deleteSelected" @click="deleteSelected" :disabled="itemsSelected.length == 0">Delete Selected Entries</button>
+        <AddVocab></AddVocab>
+      </div>
     </div>
   </div>
 </template>
@@ -130,7 +135,7 @@ header {
     margin-top: 20px;
   }
   .del-button {
-    margin-left: 10%;
+    margin-left: 5px;
     width: 60px;
     height: 20px;
   }
@@ -142,6 +147,10 @@ header {
 
   .float-right {
     margin-left: 35%;
+  }
+
+  button {
+    margin-left:5px;
   }
 }
 </style>

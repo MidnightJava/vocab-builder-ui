@@ -1,7 +1,5 @@
 <template>
-    <p>
       <button @click="showModal">Add Entry</button>
-    </p>
     <!-- If the option changed modal component the name
     <MyModal>
     -->
@@ -12,10 +10,11 @@
         :closable="false"
         :cancelButton="{text: 'Close', onclick: closeModal, loading: false}"
         :draggable="true"
+        :mask="true"
         :animation="true"
     >
       <div class="modal">
-        <div id="subtitle">Enter text for either language (with lookup) or both.</div>
+        <div id="subtitle">Enter text for either language or both</div>
         <div id="textDiv">
             <input id="fromLangInp" :placeholder="fromLangHint" type="text" v-model="fromWord" />
             <button @click="() => {fromWord = ''}" :disabled="!fromWord.length">Clear</button>
@@ -140,7 +139,7 @@
     #buttonDiv {
         display: flex;
         justify-content: left;
-        margin-left: 20px;
+        margin-left: 5px;
         padding-left: 15px;
     }
 
