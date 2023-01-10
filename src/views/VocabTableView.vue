@@ -117,9 +117,9 @@
           <font-awesome-icon class="float-right" icon="fa-solid fa-ellipsis" />
         </template>
       </VocabTable>
-      <div class="custom-footer">
+      <div class="customize-footer">
         <div class="customize-index">
-          Now displaying: {{currentPageFirstIndex}} ~ {{currentPageLastIndex}} of {{clientItemsLength}}
+          Now displaying entries {{currentPageFirstIndex}} ~ {{currentPageLastIndex}} of {{clientItemsLength}}
         </div>
 
         <span class="customize-page-input">
@@ -210,19 +210,11 @@ header {
     margin-left:5px;
   }
 
-  .custom-footer {
+  .customize-footer {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px;
-  }
-
-  .customize-rows-per-page {
-    align-items: center
-  }
-
-  .customize-rows-per-page > select {
-    text-align: center;
   }
 
   .customize-index {
@@ -236,25 +228,6 @@ header {
 
   .customize-page-input input {
     width: 30px;
-  }
-
-  .customize-button {
-    cursor: grab;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-right: 11px;
-    padding-left: 11px;
-  }
-
-  .customize-button.active {
-    background: rgb(101, 182, 101);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    align-items: center;
-    text-align: center;
-    cursor: default;
-    
   }
   
 }

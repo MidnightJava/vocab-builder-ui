@@ -2,6 +2,36 @@
 
 import { inject, computed, ref } from 'vue'
 import  LangsTable from 'vue3-easy-data-table' ;
+import { usePagination, useRowsPerPage } from "use-vue3-easy-data-table";
+
+const dataTable = ref();
+
+const rowsPerPage = 15;
+
+const currentPageNumber = ref(1);
+
+const {
+  currentPageFirstIndex,
+  currentPageLastIndex,
+  clientItemsLength,
+  maxPaginationNumber,
+  currentPaginationNumber,
+  isFirstPage,
+  isLastPage,
+  nextPage,
+  prevPage,
+  updatePage,
+} = usePagination(dataTable);
+
+const {
+  rowsPerPageOptions,
+  rowsPerPageActiveOption,
+  updateRowsPerPageActiveOption,
+} = useRowsPerPage(dataTable);
+
+const updateRowsPerPageSelect = (e) => {
+  updateRowsPerPageActiveOption(Number((e.target).value));
+};
 
 const headers = [
   { text: "ID", value: "id", sortable: true },
@@ -35,16 +65,40 @@ const itemsSelected =  ref([])
   <div class="float-container">
     <div class="float-child">
       <LangsTable
+        ref="dataTable"
         :headers="headers"
         :items="getItems"
         v-model:items-selected="itemsSelected"
-        :rows-items=[20,30,50]
-        :rows-per-page="20"
+        :rows-per-page="rowsPerPage"
         :search-value="searchValue"
         :search-field="searchField"
         alternating
         border-cell
+        hide-footer
       />
+      <div class="customize-footer">
+        <div class="customize-index">
+          Now displaying entries {{currentPageFirstIndex}} ~ {{currentPageLastIndex}} of {{clientItemsLength}}
+        </div>
+
+        <span class="customize-page-input">
+          Go to page
+          <input
+            type="number"
+            min="1" :max="Math.ceil(clientItemsLength/rowsPerPage)"
+            v-model="currentPageNumber"
+            @change="() => {
+              updatePage(currentPageNumber)
+              }"
+          >
+            of {{ Math.ceil(clientItemsLength/rowsPerPage) }}
+        </span>
+      
+        <div class="customize-pagination">
+          <button class="prev-page" @click="() => {currentPageNumber--; prevPage()}" :disabled="isFirstPage">prev page</button>
+          <button class="next-page" @click="() => {currentPageNumber++; nextPage()}" :disabled="isLastPage">next page</button>
+        </div>
+      </div>
     </div>
     <div class="float-child">
       <input type="text" placeholder="Search" v-model="searchValue" />
@@ -75,4 +129,24 @@ const itemsSelected =  ref([])
 #deleteSelected {
     margin-top: 20px;
 }
+
+.customize-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .customize-index {
+    flex: 1 1 auto;
+    padding: 10px;
+  }
+
+  .customize-page-input {
+    display: block;
+  }
+
+  .customize-page-input input {
+    width: 30px;
+  }
 </style>
