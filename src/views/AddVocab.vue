@@ -13,19 +13,18 @@
         :cancelButton="{text: 'Close', onclick: closeModal, loading: false}"
         :draggable="true"
         :animation="true"
-        type="clean"
     >
       <div class="modal">
-        <div id="subtitle">Lookup meaning of either word, or specify a translation manually</div>
+        <div id="subtitle">Enter text for either language (with lookup) or both.</div>
         <div id="textDiv">
             <input id="fromLangInp" :placeholder="fromLangHint" type="text" v-model="fromWord" />
-            <button @click="() => {fromWord = ''}">Clear</button>
-            <input id="toLangInp"  :placeholder="toLangHint" type="text" v-model="toWord" />
-            <button @click="() => {toWord = ''}">Clear</button>
+            <button @click="() => {fromWord = ''}" :disabled="!fromWord.length">Clear</button>
+            <input id="toLangInp" :placeholder="toLangHint" type="text" v-model="toWord" />
+            <button @click="() => {toWord = ''}" :disabled="!toWord.length">Clear</button>
         </div>
         <div id="buttonDiv">
             <button :disabled="lookupDisabled" @click="lookup">Lookup Translation</button>
-            <button  :disabled="submitDisabled" @click="closeModal">Submit</button>
+            <button  :disabled="submitDisabled" @click="postEntry()">Submit</button>
         </div>
       </div>
     </Modal>
@@ -49,12 +48,27 @@
     const transResult = ref(null);
     const errResult = ref(null);
 
+    const vocab = inject("vocab");
+    const err = ref(null);
+
     const showModal = () => {
         isVisible.value = true;
     }
 
     const closeModal = () => {
         isVisible.value = false;
+    }
+
+    const postEntry = () => {
+        useFetch(`http://localhost:5000/vocab/add_entry`, transResult, errResult, "POST", {"from": fromWord.value, "to": toWord.value}, () => {
+            if (errResult.value) {
+                console.log(errResult.value);
+            } else {
+                useFetch('http://localhost:5000/vocab/get_all', vocab, err, "GET", null, () => {
+                    closeModal();
+                });
+            }
+        })
     }
 
     const lookup = () => {
@@ -112,7 +126,7 @@
         height: 100%;
     }
 
-    input {
+    input[type=text] {
         margin-bottom: 5px;
         margin-right: 5px;
         width: 330px;
@@ -137,9 +151,8 @@
     #subtitle {
         font-size: 0.8em;
     }
-    
 
-    // .modal-vue3-footer-ok {
-    //     display: none !important;
-    // }
+    .modal-vue3-footer-ok {
+        display: none !important;
+    }
   </style>
