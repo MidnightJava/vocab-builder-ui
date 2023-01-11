@@ -60,7 +60,6 @@ const itemsSelected =  ref([])
         ref="dataTable"
         :headers="headers"
         :items="getItems"
-        v-model:items-selected="itemsSelected"
         :rows-per-page="rowsPerPage"
         :search-value="searchValue"
         :search-field="searchField"

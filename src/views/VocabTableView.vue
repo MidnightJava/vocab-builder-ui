@@ -32,7 +32,7 @@
   const headers = [
     { text: fromLang, value: fromLang.toLowerCase(), width: 200, sortable: true },
     { text: toLang, value: toLang.toLowerCase(), width: 200, sortable: true },
-    { text: "Action", value: "opts", width: 165, sortable: false }
+    { text: "Add/Update", value: "opts", width: 165, sortable: false }
   ];
 
   const getItems = computed( () => {
@@ -85,6 +85,7 @@
   const editEntry = () => {
 
   }
+
 </script>
 
 <template>
@@ -231,6 +232,13 @@ header {
 
   .customize-page-input input {
     width: 30px;
+  }
+
+  .header-item {
+    background-color: yellow;
+    background: yellow;
+    display: flex;
+    justify-content: space-between;
   }
   
 }
