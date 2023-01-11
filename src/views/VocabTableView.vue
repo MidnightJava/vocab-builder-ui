@@ -1,6 +1,6 @@
 <script setup>
   import { inject, computed, ref } from 'vue';
-  import { usePagination, useRowsPerPage } from "use-vue3-easy-data-table";
+  import { usePagination } from "use-vue3-easy-data-table";
 
   import { useFetch } from "../components/fetch.js"
   import  VocabTable from 'vue3-easy-data-table' ;
@@ -17,7 +17,6 @@
     currentPageLastIndex,
     clientItemsLength,
     maxPaginationNumber,
-    currentPaginationNumber,
     isFirstPage,
     isLastPage,
     nextPage,
@@ -25,33 +24,28 @@
     updatePage,
   } = usePagination(dataTable);
 
-  const {
-    rowsPerPageOptions,
-    rowsPerPageActiveOption,
-    updateRowsPerPageActiveOption,
-  } = useRowsPerPage(dataTable);
-
-  const updateRowsPerPageSelect = (e) => {
-    updateRowsPerPageActiveOption(Number((e.target).value));
-  };
 
   const fromLang = inject("fromLang");
   const toLang = inject("toLang");
   const vocab = inject('vocab');
 
   const headers = [
-    { text: fromLang, value: fromLang.toLowerCase(), sortable: true },
-    { text: toLang, value: toLang.toLowerCase(), sortable: true },
-    { text: "Action", value: "opts", sortable: false }
+    { text: fromLang, value: fromLang.toLowerCase(), width: 200, sortable: true },
+    { text: toLang, value: toLang.toLowerCase(), width: 200, sortable: true },
+    { text: "Action", value: "opts", width: 165, sortable: false }
   ];
 
   const getItems = computed( () => {
     if (vocab) {
       const data = vocab.value || {};
       let count = 1;
-      return Object.entries(data).map((entry) => {
+      const items = Object.entries(data).map((entry) => {
         return {id: count++, [toLang.toLowerCase()]: entry[0], [fromLang.toLowerCase()]: entry[1].translations, opts: false }
-      })
+      });
+      for (let i = items.length; i % 15 != 0; i++) {
+        items.push({id: 0,  [toLang.toLowerCase()]: "", [fromLang.toLowerCase()]: "", opts: false});
+      }
+      return items;
     } else {
       return []
     }
@@ -86,7 +80,10 @@
       }
       
     })
-   
+  }
+
+  const editEntry = () => {
+
   }
 </script>
 
@@ -107,10 +104,15 @@
       >
         <template #item-opts="item" >
           <div @mouseout="() => showOpt = 0" @mouseover="() => showOpt = item.id">
-              <button class="del-button" @click="() => deleteEntry(item)" v-if="showOpt === item.id">
+            <span v-if="showOpt === item.id && item.id !== 0">
+              <button class="del-button" @click="() => editEntry(item)" >
+                Edit
+              </button>
+              <button class="del-button" @click="() => deleteEntry(item)" >
                 Delete
               </button>
-              <button class="del-button hide" v-else></button>
+            </span>
+            <button class="del-button hide" v-else></button>
           </div>
         </template>
         <template #header-opts>
@@ -126,7 +128,7 @@
           Go to page
           <input
             type="number"
-            min="1" :max="Math.ceil(clientItemsLength/rowsPerPage)"
+            min="1" :max="maxPaginationNumber"
             v-model="currentPageNumber"
             @change="() => {
               updatePage(currentPageNumber)
@@ -170,7 +172,7 @@ header {
 }
 
 .float-child {
-    width: 400px;
+    width: 630px;
     float: left;
     padding: 20px;
 }  
@@ -192,7 +194,7 @@ header {
     margin-top: 20px;
   }
   .del-button {
-    margin-left: 30px;
+    margin-left: 5px;
     width: 60px;
     height: 20px;
   }
@@ -200,6 +202,7 @@ header {
   .hide {
     border: none;
     background-color: inherit;
+    width: 130px;
   }
 
   .float-right {

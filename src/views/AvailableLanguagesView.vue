@@ -2,7 +2,7 @@
 
 import { inject, computed, ref } from 'vue'
 import  LangsTable from 'vue3-easy-data-table' ;
-import { usePagination, useRowsPerPage } from "use-vue3-easy-data-table";
+import { usePagination } from "use-vue3-easy-data-table";
 
 const dataTable = ref();
 
@@ -15,7 +15,6 @@ const {
   currentPageLastIndex,
   clientItemsLength,
   maxPaginationNumber,
-  currentPaginationNumber,
   isFirstPage,
   isLastPage,
   nextPage,
@@ -23,20 +22,10 @@ const {
   updatePage,
 } = usePagination(dataTable);
 
-const {
-  rowsPerPageOptions,
-  rowsPerPageActiveOption,
-  updateRowsPerPageActiveOption,
-} = useRowsPerPage(dataTable);
-
-const updateRowsPerPageSelect = (e) => {
-  updateRowsPerPageActiveOption(Number((e.target).value));
-};
-
 const headers = [
   { text: "ID", value: "id", sortable: true },
-  { text: "Name", value: "name", sortable: true },
-  { text: "Native Name", value: "nativeName", sortable: true },
+  { text: "Name", value: "name", width: 200, sortable: true },
+  { text: "Native Name", value: "nativeName", width: 200, sortable: true },
 ];
 
 const data = inject("langs")
@@ -44,13 +33,16 @@ const data = inject("langs")
 const getItems = computed( () => {
   if (data) {
     const _data = data.value || [];
-    return Object.keys(_data).map(id => 
+    const items = Object.keys(_data).map(id => 
       ({id, name: _data[id]["name"], nativeName: _data[id]["nativeName"]})
-    )
+    );
+    for (let i = items.length; i % 15 != 0; i++) {
+      items.push({id: "", name: "", nativeName: ""});
+    }
+    return items;
   } else {
     return []
   }
-  
 })
 
 
@@ -85,13 +77,13 @@ const itemsSelected =  ref([])
           Go to page
           <input
             type="number"
-            min="1" :max="Math.ceil(clientItemsLength/rowsPerPage)"
+            min="1" :max="maxPaginationNumber"
             v-model="currentPageNumber"
             @change="() => {
               updatePage(currentPageNumber)
               }"
           >
-            of {{ Math.ceil(clientItemsLength/rowsPerPage) }}
+            of {{ maxPaginationNumber }}
         </span>
       
         <div class="customize-pagination">
@@ -121,7 +113,7 @@ const itemsSelected =  ref([])
 }
 
 .float-child {
-    width: 400px;
+    width: 500px;
     float: left;
     padding: 20px;
 } 
