@@ -9,6 +9,8 @@ The user loads the vocabulary information into the app by either importing a csv
 
 ## Project Setup
 
+Install node.js, preferably at least the latest LTS version. The best way to manage your node.js/npm installatio is to use nvm, which you can fine here: https://github.com/nvm-sh/nvm
+
 ```sh
 npm install
 ```
