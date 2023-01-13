@@ -30,8 +30,8 @@
   const vocab = inject('vocab');
 
   const headers = [
-    { text: fromLang, value: fromLang.toLowerCase(), width: 200, sortable: true },
-    { text: toLang, value: toLang.toLowerCase(), width: 200, sortable: true },
+    { text: fromLang.value, value: fromLang.value?.toLowerCase(), width: 200, sortable: true },
+    { text: toLang.value, value: toLang.value?.toLowerCase(), width: 200, sortable: true },
     { text: "Add/Update", value: "opts", width: 165, sortable: false }
   ];
 
@@ -40,10 +40,10 @@
       const data = vocab.value || {};
       let count = 1;
       const items = Object.entries(data).map((entry) => {
-        return {id: count++, [toLang.toLowerCase()]: entry[0], [fromLang.toLowerCase()]: entry[1].translations, opts: false }
+        return {id: count++, [toLang.value?.toLowerCase()]: entry[0], [fromLang.value?.toLowerCase()]: entry[1].translations, opts: false }
       });
       for (let i = items.length; i % 15 != 0; i++) {
-        items.push({id: 0,  [toLang.toLowerCase()]: "", [fromLang.toLowerCase()]: "", opts: false});
+        items.push({id: 0,  [toLang.value?.toLowerCase()]: "", [fromLang.value?.toLowerCase()]: "", opts: false});
       }
       return items;
     } else {
@@ -53,7 +53,7 @@
   })
 
   const searchValue = ref("");
-  const searchField = ref([toLang.toLowerCase(), fromLang.toLowerCase()]);
+  const searchField = ref([toLang.value?.toLowerCase(), fromLang.value?.toLowerCase()]);
   const itemsSelected =  ref([]);
   const showOpt = ref(0)
 

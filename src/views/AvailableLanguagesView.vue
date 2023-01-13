@@ -10,6 +10,9 @@ const rowsPerPage = 15;
 
 const currentPageNumber = ref(1);
 
+const fromLang = inject("fromLang");
+const toLang = inject("toLang");
+
 const {
   currentPageFirstIndex,
   currentPageLastIndex,
@@ -26,6 +29,7 @@ const headers = [
   { text: "ID", value: "id", sortable: true },
   { text: "Name", value: "name", width: 200, sortable: true },
   { text: "Native Name", value: "nativeName", width: 200, sortable: true },
+  { text: "Select As:", value: "select", width: 165, sortable: false }
 ];
 
 const data = inject("langs")
@@ -33,11 +37,12 @@ const data = inject("langs")
 const getItems = computed( () => {
   if (data) {
     const _data = data.value || [];
+    let cnt = 1;
     const items = Object.keys(_data).map(id => 
-      ({id, name: _data[id]["name"], nativeName: _data[id]["nativeName"]})
+      ({count: cnt++, id, name: _data[id]["name"], nativeName: _data[id]["nativeName"]})
     );
     for (let i = items.length; i % 15 != 0; i++) {
-      items.push({id: "", name: "", nativeName: ""});
+      items.push({count: 0, id: "", name: "", nativeName: ""});
     }
     return items;
   } else {
@@ -45,11 +50,18 @@ const getItems = computed( () => {
   }
 })
 
+const setTo = (obj) => {
+ toLang.value = obj["name"];
+}
 
+const setFrom = (obj) => {
+  fromLang.value = obj["name"];
+}
 
 const searchValue = ref();
 const searchField = ref([]);
-const itemsSelected =  ref([])
+const itemsSelected =  ref([]);
+const showOpt = ref(0);
 
 </script>
 
@@ -66,7 +78,21 @@ const itemsSelected =  ref([])
         alternating
         border-cell
         hide-footer
-      />
+      >
+      <template #item-select="item" >
+          <div @mouseout="() => {showOpt = 0}" @mouseover="() => {showOpt = item.count}">
+            <span v-if="showOpt === item.count && item.count !== 0">
+              <button class="del-button" @click="() => setFrom(item)" >
+                From
+              </button>
+              <button class="del-button"  @click="() => setTo(item)" >
+                To
+              </button>
+            </span>
+            <button class="del-button hide" v-else></button>
+          </div>
+        </template>
+      </LangsTable>
       <div class="customize-footer">
         <div class="customize-index">
           Now displaying entries {{currentPageFirstIndex}} ~ {{currentPageLastIndex}} of {{clientItemsLength}}
@@ -81,7 +107,7 @@ const itemsSelected =  ref([])
             @change="() => {
               updatePage(currentPageNumber)
               }"
-          >
+          />
             of {{ maxPaginationNumber }}
         </span>
       
@@ -101,18 +127,26 @@ const itemsSelected =  ref([])
         <input type="checkbox" id="nativeNameCB" value="nativeName" v-model="searchField" />
         <label for="nativeNameCB">Native Name</label>
       </div>
+      <div class="top-margin-5 grid-2-col">
+        <label>From Language:</label>
+        <input id="langInp" type="text" v-model="fromLang"  placeholder="Enter here or select from table" />
+      </div>
+      <div class="grid-2-col">
+        <label>To Language:</label>
+        <input id="langInp" type="text" v-model="toLang" placeholder="Enter her or select from table" />
+      </div>
     </div>
-</div>
+  </div>
 </template>
 
-<style>
+<style scoped>
 .float-container {
     border: 3px solid #fff;
     padding: 20px;
 }
 
 .float-child {
-    width: 500px;
+    width: 630px;
     float: left;
     padding: 20px;
 } 
@@ -140,4 +174,30 @@ const itemsSelected =  ref([])
   .customize-page-input input {
     width: 30px;
   }
+  .del-button {
+    margin-left: 5px;
+    width: 60px;
+    height: 20px;
+  }
+
+  .hide {
+    border: none;
+    background-color: inherit;
+    width: 130px;
+  }
+
+  .top-margin-5 {
+    margin-top: 5px;
+  }
+
+  .grid-2-col {
+    display: grid;
+    grid-template-columns: 23% 77%;
+  }
+
+  #langInp {
+    width: 210px;
+    margin-left: 5px;
+  }
+
 </style>

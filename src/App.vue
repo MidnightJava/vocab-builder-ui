@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, provide } from 'vue';
+  import { ref, computed, provide, onMounted, watchEffect } from 'vue';
   import { useFetch } from './components/fetch.js'
   import  VocabTableView from './views/VocabTableView.vue' ;
   import FlashCardView from './views/FlashCardView.vue';
@@ -11,12 +11,14 @@
   const langs = ref(null);
   const vocab = ref(null);
   const err = ref(null);
+  const fromLang = ref("");
+  const toLang = ref("");
   provide("langs", langs);
   provide("vocab", vocab);
 
 
-  provide("fromLang", "English")
-  provide("toLang", "Italian")
+  provide("fromLang", fromLang);
+  provide("toLang", toLang);
 
   const compMap = {
     "Available Languages": AvailableLanguagesView,
@@ -26,14 +28,24 @@
   }
 
   const tabs = Object.keys(compMap);
-  useFetch('http://localhost:5000/init?from_lang=en&to_lang=it', ref(null), ref(null), "GET", null, () => {
-   useFetch('http://localhost:5000/languages/get', langs, err);
-   useFetch('http://localhost:5000/vocab/get_all', vocab, err);
-  })
+ 
+
+  const init = (fromLang, toLang) => {
+    useFetch(`http://localhost:5000/init?from_lang=${fromLang.value}&to_lang=${toLang.value}`, ref(null), ref(null), "GET", null, () => {
+      useFetch('http://localhost:5000/languages/get', langs, err);
+      useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+    })
+  }
 
   const currentTabComponent = computed(() => {
     return compMap[currentTab.value]
   })
+
+  onMounted(() => {
+    watchEffect(async () => {
+      init(fromLang, toLang);
+    })
+  });
 </script>
 
 <template>
