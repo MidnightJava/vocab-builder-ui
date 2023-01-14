@@ -11,8 +11,8 @@
   const langs = ref(null);
   const vocab = ref(null);
   const err = ref(null);
-  const fromLang = ref("");
-  const toLang = ref("");
+  const fromLang = ref({name: "", id: ""});
+  const toLang = ref({name: "", id: ""});
   provide("langs", langs);
   provide("vocab", vocab);
 
@@ -31,9 +31,10 @@
  
 
   const init = (fromLang, toLang) => {
-    useFetch(`http://localhost:5000/init?from_lang=${fromLang.value}&to_lang=${toLang.value}`, ref(null), ref(null), "GET", null, () => {
-      useFetch('http://localhost:5000/languages/get', langs, err);
-      useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+    useFetch(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, ref(null), ref(null), "GET", null, () => {
+      useFetch('http://localhost:5000/languages/get', langs, err, "GET", null, () => {
+        useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+      });
     })
   }
 

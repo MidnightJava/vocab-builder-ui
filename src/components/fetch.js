@@ -22,7 +22,8 @@ export function useFetch(url, data, error, method="GET", payload=null, callback=
       if (callback) callback();
   })
   .catch((err) => {
-      error.value = err
+      error.value = err;
+      if (callback) callback();
   })
 
 }

@@ -75,7 +75,7 @@
         let [frl, tol] = [null, null]
         let targetRef = null;
         if (fromWord.value.length > 0 & toWord.value.length == 0) {
-            [frl, tol] = [fromLang, toLang];
+            [frl, tol] = [fromLang.value.id, toLang.value.id];
             word = fromWord.value;
             targetRef = toWord;
         } else if (toWord.value.length > 0 & fromWord.value.length == 0) {
@@ -97,11 +97,11 @@
     }
 
     const fromLangHint = computed( () => {
-        return `Enter ${fromLang} word or phraase`;
+        return `Enter ${fromLang.value.name} word or phraase`;
     })
 
     const toLangHint = computed( () => {
-        return `Enter ${toLang} word or phrase`;
+        return `Enter ${toLang.value.name} word or phrase`;
     })
 
     const lookupDisabled = computed( () => {

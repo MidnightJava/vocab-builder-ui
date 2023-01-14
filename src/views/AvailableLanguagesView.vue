@@ -51,15 +51,15 @@ const getItems = computed( () => {
 })
 
 const setTo = (obj) => {
- toLang.value = obj["name"];
+ toLang.value = obj;
 }
 
 const setFrom = (obj) => {
-  fromLang.value = obj["name"];
+  fromLang.value = obj;
 }
 
 const searchValue = ref();
-const searchField = ref([]);
+const searchField = ref(["name", "id"]);
 const itemsSelected =  ref([]);
 const showOpt = ref(0);
 
@@ -129,11 +129,11 @@ const showOpt = ref(0);
       </div>
       <div class="top-margin-5 grid-2-col">
         <label>From Language:</label>
-        <input id="langInp" type="text" v-model="fromLang"  placeholder="Enter here or select from table" />
+        <input id="langInp" type="text" v-model="fromLang.name"  placeholder="Enter here or select from table" />
       </div>
       <div class="grid-2-col">
         <label>To Language:</label>
-        <input id="langInp" type="text" v-model="toLang" placeholder="Enter her or select from table" />
+        <input id="langInp" type="text" v-model="toLang.name" placeholder="Enter her or select from table" />
       </div>
     </div>
   </div>
