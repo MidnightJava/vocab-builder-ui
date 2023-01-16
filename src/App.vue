@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, provide, onMounted, watchEffect } from 'vue';
+  import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue';
   import { useFetch } from './components/fetch.js'
   import  VocabTableView from './views/VocabTableView.vue' ;
   import FlashCardView from './views/FlashCardView.vue';
@@ -8,7 +8,8 @@
 
   let currentTab = ref("Available Languages");
 
-  const langs = ref(null);
+  const langs = ref({});
+  const defLangs = ref({});
   const vocab = ref(null);
   const err = ref(null);
   const fromLang = ref({name: "", id: ""});
@@ -33,8 +34,10 @@
   const init = (fromLang, toLang) => {
     useFetch(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, ref(null), ref(null), "GET", null, () => {
       useFetch('http://localhost:5000/languages/get', langs, err, "GET", null, () => {
-        useFetch('http://localhost:5000/vocab/get_all', vocab, err);
-      });
+        useFetch('http://localhost:5000/languages/get_defaults', defLangs, ref(), "GET", null, () => {
+          useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+        })
+      })
     })
   }
 
@@ -42,11 +45,40 @@
     return compMap[currentTab.value]
   })
 
-  onMounted(() => {
-    watchEffect(async () => {
-      init(fromLang, toLang);
-    })
-  });
+  const setFromId = (name) => {
+    for (let id of Object.keys(langs.value)) {
+      if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
+        fromLang.value.id = id;
+        break;
+      }
+    }
+}
+
+const setToId = (name) => {
+  for (let id of Object.keys(langs.value)) {
+    if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
+      toLang.value.id = id;
+      break;
+    }
+  }
+}
+
+const initialCap = (s) => {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+watch(defLangs, (newVal) => {
+  fromLang.value.name = initialCap(newVal.from);
+  setFromId(newVal.from);
+  toLang.value.name = initialCap(newVal.to);
+  setToId(newVal.to);
+});
+
+onMounted(() => {
+  watchEffect(async () => {
+    init(fromLang, toLang);
+  })
+});
 </script>
 
 <template>

@@ -1,8 +1,9 @@
 <script setup>
 
-import { inject, computed, ref } from 'vue'
+import { inject, computed, ref, watch } from 'vue'
 import  LangsTable from 'vue3-easy-data-table' ;
 import { usePagination } from "use-vue3-easy-data-table";
+import { useFetch } from '../components/fetch';
 
 const dataTable = ref();
 
@@ -58,9 +59,33 @@ const setFrom = (obj) => {
   fromLang.value = obj;
 }
 
-const searchValue = ref();
+const setFromId = (name) => {
+  for (let id of Object.keys(data.value)) {
+    if (data.value[id].name?.toLowerCase() === name.toLowerCase()) {
+      fromLang.value.id = id;
+      break;
+    }
+  }
+}
+
+const setToId = (name) => {
+  for (let id of Object.keys(data.value)) {
+    if (data.value[id].name?.toLowerCase() === name.toLowerCase()) {
+      toLang.value.id = id;
+      break;
+    }
+  }
+}
+
+const setDefRes = ref();
+const setDefErr = ref();
+
+const setDefaultLangs = () => {
+  useFetch(`http://localhost:5000/languages/set_defaults`, setDefRes, setDefErr, "POST", {"from": fromLang.value.name, "to": toLang.value.name})
+}
+
+const searchValue = ref("");
 const searchField = ref(["name", "id"]);
-const itemsSelected =  ref([]);
 const showOpt = ref(0);
 
 </script>
@@ -82,14 +107,14 @@ const showOpt = ref(0);
       <template #item-select="item" >
           <div @mouseout="() => {showOpt = 0}" @mouseover="() => {showOpt = item.count}">
             <span v-if="showOpt === item.count && item.count !== 0">
-              <button class="del-button" @click="() => setFrom(item)" >
+              <button class="lang-button" @click="() => setFrom(item)" >
                 From
               </button>
-              <button class="del-button"  @click="() => setTo(item)" >
+              <button class="lang-button"  @click="() => setTo(item)" >
                 To
               </button>
             </span>
-            <button class="del-button hide" v-else></button>
+            <button class="lang-button hide" v-else></button>
           </div>
         </template>
       </LangsTable>
@@ -126,15 +151,20 @@ const showOpt = ref(0);
         <label for="nameCB">Name </label>
         <input type="checkbox" id="nativeNameCB" value="nativeName" v-model="searchField" />
         <label for="nativeNameCB">Native Name</label>
+        <button :disabled="!searchValue.length" @click="searchValue = ''">Clear</button>
       </div>
-      <div class="top-margin-5 grid-2-col">
+      <div class="top-margin-5 grid-3-col">
         <label>From Language:</label>
-        <input id="langInp" type="text" v-model="fromLang.name"  placeholder="Enter here or select from table" />
+        <input class="lang-inp" type="text" v-model="fromLang.name" @change="(e) => setFromId(e.target.value)" placeholder="Enter here or select from table" />
+        <label class="lang-id-label">ID: {{ fromLang.id }}</label>
       </div>
-      <div class="grid-2-col">
+      <div class="grid-3-col">
         <label>To Language:</label>
-        <input id="langInp" type="text" v-model="toLang.name" placeholder="Enter her or select from table" />
+        <input class="lang-inp" type="text" v-model="toLang.name" @change="(e) => setToId(e.target.value)" placeholder="Enter here or select from table" />
+        <label class="lang-id-label">ID: {{ toLang.id }}</label>
       </div>
+      <button class="default-btn" :disabled="!toLang.id.length || !fromLang.id.length" @click="setDefaultLangs" >Save as Default Languages</button>
+
     </div>
   </div>
 </template>
@@ -174,10 +204,17 @@ const showOpt = ref(0);
   .customize-page-input input {
     width: 30px;
   }
-  .del-button {
-    margin-left: 5px;
+  .lang-button {
     width: 60px;
     height: 20px;
+  }
+
+  button {
+    margin-left:5px;
+  }
+
+  .default-btn {
+    margin-left: 0px;
   }
 
   .hide {
@@ -190,13 +227,17 @@ const showOpt = ref(0);
     margin-top: 5px;
   }
 
-  .grid-2-col {
+  .grid-3-col {
     display: grid;
-    grid-template-columns: 23% 77%;
+    grid-template-columns: 20% 32% 25%;
   }
 
-  #langInp {
-    width: 210px;
+  .lang-inp {
+    width: 180px;
+    margin-left: 5px;
+  }
+
+  .lang-id-label {
     margin-left: 5px;
   }
 
