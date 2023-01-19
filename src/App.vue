@@ -34,9 +34,13 @@
   const init = (fromLang, toLang) => {
     useFetch(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, ref(null), ref(null), "GET", null, () => {
       useFetch('http://localhost:5000/languages/get', langs, err, "GET", null, () => {
-        useFetch('http://localhost:5000/languages/get_defaults', defLangs, ref(), "GET", null, () => {
+        if (!Object.keys(defLangs.value).length) {
+          useFetch('http://localhost:5000/languages/get_defaults', defLangs, ref(), "GET", null, () => {
+            useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+          })
+        } else {
           useFetch('http://localhost:5000/vocab/get_all', vocab, err);
-        })
+        }
       })
     })
   }
@@ -46,26 +50,42 @@
   })
 
   const setFromId = (name) => {
+    let found = false;
     for (let id of Object.keys(langs.value)) {
       if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
         fromLang.value.id = id;
+        found = true;
         break;
       }
     }
+    if (!found) {
+      fromLang.value.id = "";
+    }
 }
 
+provide("setFromIdFunc", setFromId)
+
 const setToId = (name) => {
+  let found = false;
   for (let id of Object.keys(langs.value)) {
     if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
       toLang.value.id = id;
+      found = true;
       break;
     }
   }
+  if (!found) {
+    toLang.value.id = "";
+  }
 }
+
+provide("setToIdFunc", setToId)
 
 const initialCap = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+provide('initialCap', initialCap);
 
 watch(defLangs, (newVal) => {
   fromLang.value.name = initialCap(newVal.from);

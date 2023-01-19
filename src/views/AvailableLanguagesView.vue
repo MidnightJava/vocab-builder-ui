@@ -59,23 +59,8 @@ const setFrom = (obj) => {
   fromLang.value = obj;
 }
 
-const setFromId = (name) => {
-  for (let id of Object.keys(data.value)) {
-    if (data.value[id].name?.toLowerCase() === name.toLowerCase()) {
-      fromLang.value.id = id;
-      break;
-    }
-  }
-}
-
-const setToId = (name) => {
-  for (let id of Object.keys(data.value)) {
-    if (data.value[id].name?.toLowerCase() === name.toLowerCase()) {
-      toLang.value.id = id;
-      break;
-    }
-  }
-}
+const setFromId = inject("setFromIdFunc")
+const setToId = inject("setToIdFunc")
 
 const setDefRes = ref();
 const setDefErr = ref();
@@ -87,6 +72,18 @@ const setDefaultLangs = () => {
 const searchValue = ref("");
 const searchField = ref(["name", "id"]);
 const showOpt = ref(0);
+
+watch(() => toLang.value.name, (newv, oldv) => {
+  if (newv == fromLang.value.name) {
+    toLang.value.name = oldv;
+  }
+})
+
+watch(() => fromLang.value.name, (newv, oldv) => {
+  if (newv == toLang.value.name) {
+    fromLang.value.name = oldv;
+  }
+})
 
 </script>
 
@@ -155,15 +152,15 @@ const showOpt = ref(0);
       </div>
       <div class="top-margin-5 grid-3-col">
         <label>From Language:</label>
-        <input class="lang-inp" type="text" v-model="fromLang.name" @change="(e) => setFromId(e.target.value)" placeholder="Enter here or select from table" />
+        <input class="lang-inp" type="text" v-model.lazy="fromLang.name" @change="(e) => setFromId(e.target.value)" placeholder="Enter here or select from table" />
         <label class="lang-id-label">ID: {{ fromLang.id }}</label>
       </div>
       <div class="grid-3-col">
         <label>To Language:</label>
-        <input class="lang-inp" type="text" v-model="toLang.name" @change="(e) => setToId(e.target.value)" placeholder="Enter here or select from table" />
+        <input class="lang-inp" type="text" v-model.lazy="toLang.name" @change="(e) => setToId(e.target.value)" placeholder="Enter here or select from table" />
         <label class="lang-id-label">ID: {{ toLang.id }}</label>
       </div>
-      <button class="default-btn" :disabled="!toLang.id.length || !fromLang.id.length" @click="setDefaultLangs" >Save as Default Languages</button>
+      <button class="default-btn" :disabled="!toLang.id.length || !fromLang.id.length" @click="setDefaultLangs" >Use these as Default Languages</button>
 
     </div>
   </div>

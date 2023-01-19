@@ -1,5 +1,5 @@
 <script setup>
-  import { inject, computed, ref } from 'vue';
+  import { inject, computed, ref, provide } from 'vue';
   import { usePagination } from "use-vue3-easy-data-table";
 
   import { useFetch } from "../components/fetch.js"
@@ -8,9 +8,21 @@
 
   const dataTable = ref();
 
+  let role = ref('add');
+  provide('role', role);
+
   const rowsPerPage = 15;
 
   const currentPageNumber = ref(1);
+
+  let show = ref(false);
+  provide('show', show);
+
+  let fromWord = ref('');
+  provide('fromWord', fromWord);
+  let toWord = ref('');
+  provide('toWord', toWord);
+
 
   const {
     currentPageFirstIndex,
@@ -84,8 +96,11 @@
     })
   }
 
-  const editEntry = () => {
-
+  const editEntry = (item) => {
+    role.value = 'edit';
+    toWord.value = item[toLang.value.name.toLowerCase()];
+    fromWord.value = item[fromLang.value.name.toLowerCase()];
+    show.value = true;
   }
 
 </script>

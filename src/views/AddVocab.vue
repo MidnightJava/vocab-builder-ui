@@ -4,9 +4,9 @@
     <MyModal>
     -->
     <Modal
-        v-model:visible="isVisible"
+        v-model:visible="show"
         :width="500"
-        title="Add Vocabulary Entry"
+        :title="title"
         :closable="false"
         :cancelButton="{text: 'Close', onclick: closeModal, loading: false}"
         :draggable="true"
@@ -36,26 +36,31 @@
 
     import { Modal } from 'usemodal-vue3';
 
-    let isVisible = ref(false);
+    const initialCap = inject('initialCap');
+    let role = inject('role');
 
-    const fromWord = ref("");
-    const toWord = ref("");
+    const fromWord = inject('fromWord');
+    const toWord = inject('toWord');
 
     const fromLang = inject("fromLang");
     const toLang = inject("toLang");
-
     const transResult = ref(null);
     const errResult = ref(null);
 
     const vocab = inject("vocab");
     const err = ref(null);
 
+    let show = inject('show');
+
     const showModal = () => {
-        isVisible.value = true;
+        role.value = 'add';
+        fromWord.value = "";
+        toWord.value = "";
+        show.value = true;
     }
 
     const closeModal = () => {
-        isVisible.value = false;
+       show.value = false;
     }
 
     const postEntry = () => {
@@ -111,6 +116,10 @@
 
     const submitDisabled = computed( () => {
         return  fromWord.value.length === 0 || toWord.value.length === 0
+    })
+
+    const title = computed( () => {
+        return `${initialCap(role.value)} Vocabulary Entry`
     })
   </script>
   
