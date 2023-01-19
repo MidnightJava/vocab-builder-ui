@@ -41,8 +41,6 @@
   const toLang = inject("toLang");
   const vocab = inject('vocab');
 
-  console.log(fromLang.value.value);
-
   const headers = [
     { text: fromLang.value.name, value: fromLang.value.name?.toLowerCase(), width: 200, sortable: true },
     { text: toLang.value.name, value: toLang.value.name?.toLowerCase(), width: 200, sortable: true },
@@ -57,7 +55,7 @@
         return {id: count++, [toLang.value?.name?.toLowerCase()]: entry[0], [fromLang.value?.name?.toLowerCase()]: entry[1].translations, opts: false }
       });
       for (let i = items.length; i % 15 != 0; i++) {
-        items.push({id: 0,  [toLang.value?.name?.toLowerCase()]: "", [fromLang.value?.name?.toLowerCase()]: "", opts: false});
+        items.push({id: 0,  [toLang.value?.name?.toLowerCase()]: "", [fromLang.value?.name?.toLowerCase()]: [], opts: false});
       }
       return items;
     } else {
@@ -99,7 +97,7 @@
   const editEntry = (item) => {
     role.value = 'edit';
     toWord.value = item[toLang.value.name.toLowerCase()];
-    fromWord.value = item[fromLang.value.name.toLowerCase()];
+    fromWord.value = item[fromLang.value.name.toLowerCase()].join(",");
     show.value = true;
   }
 
