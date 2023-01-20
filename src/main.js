@@ -14,6 +14,7 @@ import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons'
+import { faRotate } from '@fortawesome/free-solid-svg-icons'
 
 // import 'vue-universal-modal/dist/index.css';
 
@@ -24,6 +25,7 @@ library.add(faUserSecret)
 library.add(faBars);
 library.add(faEllipsisVertical);
 library.add(faEllipsis);
+library.add(faRotate);
 
 const app = createApp(App);
 
