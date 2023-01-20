@@ -2,6 +2,7 @@
 
 import { inject, ref, computed } from 'vue';
 import { VueFlip } from 'vue-flip';
+import { useFetch } from "../components/fetch.js";
 
 const fromLang = inject("fromLang");
 const toLang = inject("toLang")
@@ -15,17 +16,59 @@ const slot2 = ref('back');
 
 const flipped = ref(false);
 
-const startTest = () => {
-  started.value = true;
+/**
+ * TODO:
+ * Set word red when marked incorrect
+ * Call server to mark word correct or incorrect and last correct time
+ * Handle end of word list. Instruct to start again instead of using refresh word list button
+ * BugFix: preseve started state when switching tabs
+ */
+
+const runTest = () => {
+  if (started.value == false) {
+    started.value = true;
+    selectWords();
+  } else {
+    nextWord();
+  }
+  
 }
 
-const flipCommand = computed( () => {
-  if (flipped.value) {
-    return `Show Original`
-  } else  {
-    return `Show Translation`
-  }
-})
+const err = ref();
+const res = ref()
+const nextWord = () => {
+  flipped.value = false;
+  useFetch("http://localhost:5000/vocab/next_word", res, err, "GET", null, () => {
+    if (err.value) {
+      console.log(`Next Word Error: ${err.value}`);
+    } else {
+      fromWord.value = res.value.result;
+      translate();
+    }
+  })
+}
+
+const translate = () => {
+  useFetch(`http://localhost:5000/vocab/translate?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}&word=${fromWord.value}`, res, err, "GET", null, () => {
+    if (err.value) {
+      console.log(`Translate Error: ${err.value}`);
+    } else {
+      if ('result' in res.value) {
+        toWord.value = res.value.result;
+      }
+    }
+  })
+}
+
+const selectWords = () => {
+  useFetch("http://localhost:5000/vocab/select_words", ref(), err, "GET", null, () => {
+    if (err.value) {
+      console.log(`Select Words Error: ${err.value}`);
+    } else {
+      nextWord();
+    }
+  })
+}
 
 const startButtonText = computed(() => {
   return started.value ? "Next Word" : "Start Vocab Test";
@@ -42,7 +85,7 @@ const startButtonText = computed(() => {
     >
       <template v-slot:[slot1]>
         <div class="card">
-          <div class="entry"> {{ fromWord }}</div>
+          <div> {{ fromWord }}</div>
           <div class="btn-div">
             <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
           </div>
@@ -50,7 +93,7 @@ const startButtonText = computed(() => {
       </template>
       <template v-slot:[slot2]>
         <div class="card">
-          <div class="entry"> {{ toWord }}</div>
+          <div> {{ toWord }}</div>
           <div class="btn-div">
             <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
             <button id="mark-btn">Mark Incorrect</button>
@@ -59,7 +102,7 @@ const startButtonText = computed(() => {
       </template>
     </vue-flip>
     <div class="btn-div">
-      <button @click="startTest">{{ startButtonText }}</button>
+      <button @click="runTest">{{ startButtonText }}</button>
       <button v-if="started">Refresh Word List</button>
     </div>
   </div>
@@ -76,18 +119,14 @@ const startButtonText = computed(() => {
 
   .card {
     display: grid;
-    grid-template-rows: 70% 30%;
-    margin-top: 30px;
+    grid-template-rows: 20% 80%;
+    margin-top: 10px;
     padding-top: 20%;
     text-align: center;
     font-size: 3.0rem;
     border-style: solid;
     border-width: 2px;
     height: 50%;
-  }
-
-  .entry {
-    margin-top: 20%;
   }
 
   .front {
@@ -100,15 +139,14 @@ const startButtonText = computed(() => {
   }
 
   .flip-btn {
-    float:left;
-    margin-left: 5px;
-    margin-top: 10px;
-    cursor:auto;
+    float: left;
+    margin-top: 15%;
+    cursor: pointer;
   }
 
   #mark-btn {
     float: right;
-    margin-top: 30px;
+    margin-top: 20%;
   }
 
 </style>
