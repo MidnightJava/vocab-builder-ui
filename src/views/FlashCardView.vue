@@ -1,6 +1,6 @@
 <script setup>
 
-import { inject, ref, computed } from 'vue';
+import { inject, ref, computed, watch } from 'vue';
 import { VueFlip } from 'vue-flip';
 import { useFetch } from "../components/fetch.js";
 
@@ -11,13 +11,18 @@ const started = ref(false);
 const fromWord = ref("");
 const toWord = ref("");
 
+const vocab = inject("vocab");
+
 const slot1 = ref('front');
 const slot2 = ref('back');
 
 const flipped = ref(false);
 
+const reverseWordOrder = ref(false);
+
 /**
  * TODO:
+ * Handle either word order.
  * Set word red when marked incorrect
  * Call server to mark word correct or incorrect and last correct time
  * Handle end of word list. Instruct to start again instead of using refresh word list button
@@ -34,44 +39,79 @@ const runTest = () => {
   
 }
 
-const err = ref();
-const res = ref()
+const nextWordErr = ref();
+const nextWordRes = ref()
 const nextWord = () => {
   flipped.value = false;
-  useFetch("http://localhost:5000/vocab/next_word", res, err, "GET", null, () => {
-    if (err.value) {
-      console.log(`Next Word Error: ${err.value}`);
+  useFetch("http://localhost:5000/vocab/next_word", nextWordRes, nextWordErr, "GET", null, () => {
+    if (nextWordErr.value) {
+      console.log(`Next Word Error: ${nextWordErr.value}`);
     } else {
-      fromWord.value = res.value.result;
+      fromWord.value = nextWordRes.value.result;
       translate();
     }
   })
 }
 
 const translate = () => {
-  useFetch(`http://localhost:5000/vocab/translate?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}&word=${fromWord.value}`, res, err, "GET", null, () => {
-    if (err.value) {
-      console.log(`Translate Error: ${err.value}`);
-    } else {
-      if ('result' in res.value) {
-        toWord.value = res.value.result;
+  const translated = [];
+  const data = vocab.value;
+  if (!reverseWordOrder.value) {
+    //fromWord is in fromLang, and therefore found in value.translations, and the translation is the key
+    for (const entry of Object.entries(data)) {
+      const key = entry[0];
+      const val = entry[1];
+      for (const word of val.translations) {
+        if (word == fromWord.value) {
+          translated.push(key);
+          break;
+        }
       }
     }
-  })
+  } else {
+    //fromWord is in toLang, and therefore found in the keys, with translations in value.translations
+    for (const key in Object.keys(data)) {
+      if (key == fromWord.value) {
+        translated = data[key].translations.slice();
+        break;
+      }
+    }
+  }
+  toWord.value = translated.join(",");
 }
 
+const selErr = ref();
 const selectWords = () => {
-  useFetch("http://localhost:5000/vocab/select_words", ref(), err, "GET", null, () => {
-    if (err.value) {
-      console.log(`Select Words Error: ${err.value}`);
+  useFetch("http://localhost:5000/vocab/select_words", ref(), selErr, "GET", null, () => {
+    if (selErr.value) {
+      console.log(`Select Words Error: ${selErr.value}`);
     } else {
       nextWord();
     }
   })
 }
 
+const setWordOrderErr = ref();
+
+const setWordOrder = callback => {
+ const wordOrder = reverseWordOrder.value ? "to-from" : "from-to";
+  useFetch("http://localhost:5000/vocab/set_word_order", ref(), setWordOrderErr, "POST", {"value": wordOrder}, callback);
+}
+
 const startButtonText = computed(() => {
   return started.value ? "Next Word" : "Start Vocab Test";
+})
+
+watch(reverseWordOrder, newVal => {
+  console.log(`Reverse is ${newVal}`);
+  setWordOrder(() => {
+    if (newVal == true) {
+    [slot1.value, slot2.value] = ['front', 'back'];
+  } else {
+    [slot1.value, slot2.value] = ['back', 'front'];
+  }
+  });
+ 
 })
 </script>
 
@@ -103,7 +143,12 @@ const startButtonText = computed(() => {
     </vue-flip>
     <div class="btn-div">
       <button @click="runTest">{{ startButtonText }}</button>
-      <button v-if="started">Refresh Word List</button>
+      <div v-if="started">
+        <span id="word-order-grp">Present Words in: 
+          <input name="word-order" type="radio" :value="false" v-model="reverseWordOrder" />{{ fromLang.name }}
+          <input name="word-order" type="radio" :value="true" v-model="reverseWordOrder"  />{{ toLang.name }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
@@ -147,6 +192,10 @@ const startButtonText = computed(() => {
   #mark-btn {
     float: right;
     margin-top: 20%;
+  }
+
+  #word-order-grp {
+    margin-top: 5px;
   }
 
 </style>
