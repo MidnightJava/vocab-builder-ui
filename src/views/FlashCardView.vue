@@ -13,19 +13,19 @@ const toWord = ref("");
 
 const vocab = inject("vocab");
 
-const slot1 = ref('front');
-const slot2 = ref('back');
-
 const flipped = ref(false);
 
 const reverseWordOrder = ref(false);
 
+const wordCorrect = ref(true);
+
 /**
  * TODO:
- * Handle either word order.
- * Set word red when marked incorrect
+ * Handle either word order. DONE
+ * Set word red when marked incorrect DONE
  * Call server to mark word correct or incorrect and last correct time
  * Handle end of word list. Instruct to start again instead of using refresh word list button
+ * Enhance card style and animation
  * BugFix: preseve started state when switching tabs
  */
 
@@ -42,7 +42,9 @@ const runTest = () => {
 const nextWordErr = ref();
 const nextWordRes = ref()
 const nextWord = () => {
-  flipped.value = false;
+  flipped.value = reverseWordOrder.value;
+  wordCorrect.value = true;
+
   useFetch("http://localhost:5000/vocab/next_word", nextWordRes, nextWordErr, "GET", null, () => {
     if (nextWordErr.value) {
       console.log(`Next Word Error: ${nextWordErr.value}`);
@@ -54,7 +56,7 @@ const nextWord = () => {
 }
 
 const translate = () => {
-  const translated = [];
+  let translated = [];
   const data = vocab.value;
   if (!reverseWordOrder.value) {
     //fromWord is in fromLang, and therefore found in value.translations, and the translation is the key
@@ -70,9 +72,11 @@ const translate = () => {
     }
   } else {
     //fromWord is in toLang, and therefore found in the keys, with translations in value.translations
-    for (const key in Object.keys(data)) {
+    for (const entry of Object.entries(data)) {
+      const key = entry[0];
+      const val = entry[1];
       if (key == fromWord.value) {
-        translated = data[key].translations.slice();
+        translated = val.translations.slice();
         break;
       }
     }
@@ -103,15 +107,10 @@ const startButtonText = computed(() => {
 })
 
 watch(reverseWordOrder, newVal => {
-  console.log(`Reverse is ${newVal}`);
   setWordOrder(() => {
-    if (newVal == true) {
-    [slot1.value, slot2.value] = ['front', 'back'];
-  } else {
-    [slot1.value, slot2.value] = ['back', 'front'];
-  }
+  nextWord();
   });
- 
+  
 })
 </script>
 
@@ -123,20 +122,33 @@ watch(reverseWordOrder, newVal => {
       height="400px"
       v-if="started"
     >
-      <template v-slot:[slot1]>
-        <div class="card">
+      <template v-slot:front>
+        <div v-if="!reverseWordOrder" class="card">
           <div> {{ fromWord }}</div>
           <div class="btn-div">
             <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
           </div>
         </div>
-      </template>
-      <template v-slot:[slot2]>
-        <div class="card">
-          <div> {{ toWord }}</div>
+        <div v-else class="card">
+          <div :class="wordCorrect ? '': 'red-font'"> {{ toWord }}</div>
           <div class="btn-div">
             <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
-            <button id="mark-btn">Mark Incorrect</button>
+            <button id="mark-btn" @click="() => wordCorrect = false">Mark Incorrect</button>
+          </div>
+        </div>
+      </template>
+      <template v-slot:back>
+        <div v-if="!reverseWordOrder" class="card">
+          <div :class="wordCorrect ? '': 'red-font'"> {{ toWord }}</div>
+          <div class="btn-div">
+            <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
+            <button id="mark-btn" @click="() => wordCorrect = false">Mark Incorrect</button>
+          </div>
+        </div>
+        <div v-else class="card">
+          <div> {{ fromWord }}</div>
+          <div class="btn-div">
+            <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
           </div>
         </div>
       </template>
@@ -196,6 +208,11 @@ watch(reverseWordOrder, newVal => {
 
   #word-order-grp {
     margin-top: 5px;
+  }
+
+  .red-font {
+    color: red;
+    
   }
 
 </style>
