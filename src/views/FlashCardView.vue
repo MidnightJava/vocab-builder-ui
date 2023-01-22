@@ -1,12 +1,11 @@
 <script setup>
 
-import { inject, ref, computed, watch } from 'vue';
+import { inject, ref, watch, onMounted, computed } from 'vue';
 import { VueFlip } from 'vue-flip';
 import { useFetch } from "../components/fetch.js";
 
 const fromLang = inject("fromLang");
 const toLang = inject("toLang")
-const started = ref(false);
 
 const fromWord = ref("");
 const toWord = ref("");
@@ -29,19 +28,10 @@ const wordCorrect = ref(true);
  * BugFix: preseve started state when switching tabs
  */
 
-const runTest = () => {
-  if (started.value == false) {
-    started.value = true;
-    selectWords();
-  } else {
-    nextWord();
-  }
-  
-}
-
 const nextWordErr = ref();
 const nextWordRes = ref()
 const nextWord = () => {
+
   flipped.value = reverseWordOrder.value;
   wordCorrect.value = true;
 
@@ -102,15 +92,19 @@ const setWordOrder = callback => {
   useFetch("http://localhost:5000/vocab/set_word_order", ref(), setWordOrderErr, "POST", {"value": wordOrder}, callback);
 }
 
-const startButtonText = computed(() => {
-  return started.value ? "Next Word" : "Start Vocab Test";
-})
-
-watch(reverseWordOrder, newVal => {
+watch(reverseWordOrder, () => {
   setWordOrder(() => {
   nextWord();
   });
   
+})
+
+onMounted( () => {
+  selectWords()
+})
+
+const correctAction = computed(() => {
+  return `Mark ${wordCorrect.value ? "Incorrect" : "Correct"}`;
 })
 </script>
 
@@ -120,33 +114,36 @@ watch(reverseWordOrder, newVal => {
       v-model="flipped"
       width="600px"
       height="400px"
-      v-if="started"
     >
       <template v-slot:front>
         <div v-if="!reverseWordOrder" class="card">
-          <div> {{ fromWord }}</div>
+          <div class="card-title">Original</div>
+          <div class="word"> {{ fromWord }}</div>
           <div class="btn-div">
             <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
           </div>
         </div>
         <div v-else class="card">
-          <div :class="wordCorrect ? '': 'red-font'"> {{ toWord }}</div>
+          <div class="card-title">Translation</div>
+          <div :class="wordCorrect ? 'word': 'word red-font'"> {{ toWord }}</div>
           <div class="btn-div">
             <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
-            <button id="mark-btn" @click="() => wordCorrect = false">Mark Incorrect</button>
+            <button id="mark-btn" @click="() => wordCorrect = !wordCorrect">{{ correctAction }}</button>
           </div>
         </div>
       </template>
       <template v-slot:back>
         <div v-if="!reverseWordOrder" class="card">
-          <div :class="wordCorrect ? '': 'red-font'"> {{ toWord }}</div>
+          <div class="card-title">Translation</div>
+          <div :class="wordCorrect ? 'word': 'word red-font'"> {{ toWord }}</div>
           <div class="btn-div">
             <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
-            <button id="mark-btn" @click="() => wordCorrect = false">Mark Incorrect</button>
+            <button id="mark-btn" @click="() => wordCorrect = !wordCorrect">{{ correctAction }}</button>
           </div>
         </div>
         <div v-else class="card">
-          <div> {{ fromWord }}</div>
+          <div class="card-title">Original</div>
+          <div class="word"> {{ fromWord }}</div>
           <div class="btn-div">
             <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
           </div>
@@ -154,9 +151,9 @@ watch(reverseWordOrder, newVal => {
       </template>
     </vue-flip>
     <div class="btn-div">
-      <button @click="runTest">{{ startButtonText }}</button>
-      <div v-if="started">
-        <span id="word-order-grp">Present Words in: 
+      <button @click="nextWord">Next Word</button>
+      <div class="word-order-div">
+        <span>Present Words in: 
           <input name="word-order" type="radio" :value="false" v-model="reverseWordOrder" />{{ fromLang.name }}
           <input name="word-order" type="radio" :value="true" v-model="reverseWordOrder"  />{{ toLang.name }}
         </span>
@@ -176,14 +173,26 @@ watch(reverseWordOrder, newVal => {
 
   .card {
     display: grid;
-    grid-template-rows: 20% 80%;
-    margin-top: 10px;
-    padding-top: 20%;
+    grid-template-rows: 50px auto auto;
+    margin-top: 15px;
     text-align: center;
-    font-size: 3.0rem;
+    font-size: 3.2rem;
     border-style: solid;
     border-width: 2px;
-    height: 50%;
+    height: 90%;
+  }
+
+  .card-title {
+    text-align: start;
+    margin-top: 15px;
+    margin-left:15px;
+    vertical-align: top;
+    font-size: 1.2rem;
+    color: gray;
+  }
+
+  .word {
+    margin-top: 50px;
   }
 
   .front {
@@ -197,17 +206,17 @@ watch(reverseWordOrder, newVal => {
 
   .flip-btn {
     float: left;
-    margin-top: 15%;
+    margin-top: 20%;
     cursor: pointer;
   }
 
   #mark-btn {
     float: right;
-    margin-top: 20%;
+    margin-top: 25%;
   }
 
-  #word-order-grp {
-    margin-top: 5px;
+  .word-order-div {
+    margin-top: 10px;
   }
 
   .red-font {
