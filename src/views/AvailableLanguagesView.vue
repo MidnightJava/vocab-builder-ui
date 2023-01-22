@@ -30,7 +30,7 @@ const headers = [
   { text: "ID", value: "id", sortable: true },
   { text: "Name", value: "name", width: 200, sortable: true },
   { text: "Native Name", value: "nativeName", width: 200, sortable: true },
-  { text: "Select As:", value: "select", width: 165, sortable: false }
+  { text: "Select As:", value: "select", width: 185, sortable: false }
 ];
 
 const data = inject("langs")
@@ -105,10 +105,10 @@ watch(() => fromLang.value.name, (newv, oldv) => {
           <div @mouseout="() => {showOpt = 0}" @mouseover="() => {showOpt = item.count}">
             <span v-if="showOpt === item.count && item.count !== 0">
               <button class="lang-button" @click="() => setFrom(item)" >
-                From
+                Original
               </button>
               <button class="lang-button"  @click="() => setTo(item)" >
-                To
+                Translated
               </button>
             </span>
             <button class="lang-button hide" v-else></button>
@@ -150,17 +150,18 @@ watch(() => fromLang.value.name, (newv, oldv) => {
         <label for="nativeNameCB">Native Name</label>
         <button :disabled="!searchValue.length" @click="searchValue = ''">Clear</button>
       </div>
+      <div class="top-margin-10">Select the languages to use</div>
       <div class="top-margin-5 grid-3-col">
-        <label>From Language:</label>
+        <label>Original:</label>
         <input class="lang-inp" type="text" v-model.lazy="fromLang.name" @change="(e) => setFromId(e.target.value)" placeholder="Enter here or select from table" />
         <label class="lang-id-label">ID: {{ fromLang.id }}</label>
       </div>
       <div class="grid-3-col">
-        <label>To Language:</label>
+        <label>Translated:</label>
         <input class="lang-inp" type="text" v-model.lazy="toLang.name" @change="(e) => setToId(e.target.value)" placeholder="Enter here or select from table" />
         <label class="lang-id-label">ID: {{ toLang.id }}</label>
       </div>
-      <button class="default-btn" :disabled="!toLang.id.length || !fromLang.id.length" @click="setDefaultLangs" >Use these as Default Languages</button>
+      <button class="default-btn" :disabled="!toLang.id.length || !fromLang.id.length" @click="setDefaultLangs" >Set as Defaults</button>
 
     </div>
   </div>
@@ -173,9 +174,9 @@ watch(() => fromLang.value.name, (newv, oldv) => {
 }
 
 .float-child {
-    width: 630px;
+    width: 640px;
     float: left;
-    padding: 20px;
+    padding: 10px;
 } 
 
 #deleteSelected {
@@ -202,7 +203,6 @@ watch(() => fromLang.value.name, (newv, oldv) => {
     width: 30px;
   }
   .lang-button {
-    width: 60px;
     height: 20px;
   }
 
@@ -224,9 +224,13 @@ watch(() => fromLang.value.name, (newv, oldv) => {
     margin-top: 5px;
   }
 
+  .top-margin-10 {
+    margin-top: 10px;
+  }
+
   .grid-3-col {
     display: grid;
-    grid-template-columns: 20% 32% 25%;
+    grid-template-columns: 20% 32% auto;
   }
 
   .lang-inp {

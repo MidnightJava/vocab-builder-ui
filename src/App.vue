@@ -102,7 +102,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="dynamic-component-demo" class="demo">
+  <div id="top-level-app">
+    <div class="top-nav">
       <button
         v-for="tab in tabs"
         v-bind:key="tab"
@@ -111,8 +112,9 @@ onMounted(() => {
       >
         {{ tab }}
       </button>
+    </div>
 
-      <component v-bind:is="currentTabComponent" class="tab"></component>
+    <component v-bind:is="currentTabComponent" class="tab"></component>
   </div>
 </template>
 
@@ -137,12 +139,14 @@ onMounted(() => {
 .tab {
   padding: 10px;
 }
-.demo {
+#top-level-app {
   height: 80%;
-  /* width: 50%; */
   padding-top: 50px;
   padding-bottom: 50px;
   margin-left: 25%;
-  /* margin-right: auto; */
+}
+
+.top-nav {
+  margin-left: 135px;
 }
 </style>

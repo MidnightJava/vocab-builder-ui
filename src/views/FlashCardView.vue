@@ -112,7 +112,7 @@ const correctAction = computed(() => {
   <div>
     <vue-flip
       v-model="flipped"
-      width="600px"
+      width="700px"
       height="400px"
     >
       <template v-slot:front>
@@ -180,6 +180,7 @@ const correctAction = computed(() => {
     border-style: solid;
     border-width: 2px;
     height: 90%;
+    background-color: #F9F9F9;
   }
 
   .card-title {

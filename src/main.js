@@ -29,12 +29,6 @@ library.add(faRotate);
 
 const app = createApp(App);
 
-// app.use(VueUniversalModal, {
-//     teleportTarget: '#modals',
-// });
-  
-
-/* add font awesome icon component */
 app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.config.productionTip = false
