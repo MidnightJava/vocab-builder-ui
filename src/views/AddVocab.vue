@@ -109,7 +109,6 @@
         }
         useFetch(`http://localhost:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`, transResult, errResult, "GET", null, () => {
             let res = transResult.value;
-            console.log("Result: " + JSON.stringify(transResult.value.result));
             if ('result' in res) {
                 targetRef.value = res.result;
             }

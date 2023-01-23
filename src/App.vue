@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue';
-  import { useFetch } from './components/fetch.js'
+  import { useFetch2 } from './components/fetch.js'
   import  VocabTableView from './views/VocabTableView.vue' ;
   import FlashCardView from './views/FlashCardView.vue';
   import SettingsView from './views/SettingsView.vue';
@@ -30,18 +30,33 @@
 
   const tabs = Object.keys(compMap);
  
-
   const init = (fromLang, toLang) => {
-    useFetch(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, ref(null), ref(null), "GET", null, () => {
-      useFetch('http://localhost:5000/languages/get', langs, err, "GET", null, () => {
+    useFetch2(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, "GET")
+    .then( ()=> {
+      useFetch2('http://localhost:5000/languages/get', "GET")
+      .then(res => {
+        langs.value = res;
+      })
+      .then(() => {
         if (!Object.keys(defLangs.value).length) {
-          useFetch('http://localhost:5000/languages/get_defaults', defLangs, ref(), "GET", null, () => {
-            useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+          useFetch2('http://localhost:5000/languages/get_defaults')
+          .then((res) => {
+            defLangs.value = res;
+            useFetch2('http://localhost:5000/vocab/get_all')
+            .then(res => {
+              vocab.value = res;
+            })
           })
         } else {
-          useFetch('http://localhost:5000/vocab/get_all', vocab, err);
+          useFetch2('http://localhost:5000/vocab/get_all')
+          .then(res => {
+            vocab.value = res;
+          })
         }
       })
+    })
+    .catch(err => {
+      console.log(`fetch returned an error: ${err}`);
     })
   }
 
@@ -138,15 +153,19 @@ onMounted(() => {
 }
 .tab {
   padding: 10px;
+  background-color: rgb(240, 240, 240);
+  width: 80%;
+  margin-left: 10%;
 }
 #top-level-app {
   height: 80%;
   padding-top: 50px;
   padding-bottom: 50px;
-  margin-left: 25%;
+  margin-left: 10%;
+  width: 80%;
 }
 
 .top-nav {
-  margin-left: 135px;
+  text-align: center;
 }
 </style>

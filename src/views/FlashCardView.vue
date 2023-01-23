@@ -22,9 +22,12 @@ const wordCorrect = ref(true);
  * TODO:
  * Handle either word order. DONE
  * Set word red when marked incorrect DONE
+ * Unselect words after they're deleted
+ * Fnish porting useFecth to useFetch2
+ * Implement server-side data for vocab table
  * Call server to mark word correct or incorrect and last correct time
  * Handle end of word list. Instruct to start again instead of using refresh word list button
- * Enhance card style and animation
+ * Enhance card style and animation DONE
  * BugFix: preseve started state when switching tabs
  */
 
@@ -114,6 +117,7 @@ const correctAction = computed(() => {
       v-model="flipped"
       width="700px"
       height="400px"
+      class="container"
     >
       <template v-slot:front>
         <div v-if="!reverseWordOrder" class="card">
@@ -151,18 +155,23 @@ const correctAction = computed(() => {
       </template>
     </vue-flip>
     <div class="btn-div">
-      <button @click="nextWord">Next Word</button>
       <div class="word-order-div">
         <span>Present Words in: 
           <input name="word-order" type="radio" :value="false" v-model="reverseWordOrder" />{{ fromLang.name }}
           <input name="word-order" type="radio" :value="true" v-model="reverseWordOrder"  />{{ toLang.name }}
         </span>
+        <button @click="nextWord">Next Word</button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+
+.container {
+  margin-left: 20%;
+  width: 60%;
+}
 
   .btn-div {
     margin-top: 0px;
@@ -173,27 +182,28 @@ const correctAction = computed(() => {
 
   .card {
     display: grid;
-    grid-template-rows: 50px auto auto;
-    margin-top: 15px;
+    grid-template-rows: 10% 70% 20%;
+    margin-top: 20px;
     text-align: center;
     font-size: 3.2rem;
     border-style: solid;
     border-width: 2px;
     height: 90%;
-    background-color: #F9F9F9;
+    margin-left: 10%;
+    width: 80%;
+    background-color: rgb(250, 250, 250);
   }
 
   .card-title {
     text-align: start;
     margin-top: 15px;
     margin-left:15px;
-    vertical-align: top;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     color: gray;
   }
 
   .word {
-    margin-top: 50px;
+    margin-top: 15%;
   }
 
   .front {
@@ -203,17 +213,22 @@ const correctAction = computed(() => {
 
   button {
     margin-right: 5px;
+    margin-left: 10px;
+    padding: 5px;
+    background-color: white;
   }
 
   .flip-btn {
     float: left;
-    margin-top: 20%;
     cursor: pointer;
+    position: relative;
+    top: 105;
   }
 
   #mark-btn {
     float: right;
-    margin-top: 25%;
+    position: relative;
+    top: 25%;
   }
 
   .word-order-div {

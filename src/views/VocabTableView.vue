@@ -2,7 +2,7 @@
   import { inject, computed, ref, provide } from 'vue';
   import { usePagination } from "use-vue3-easy-data-table";
 
-  import { useFetch } from "../components/fetch.js"
+  import { useFetch2 } from "../components/fetch.js"
   import  VocabTable from 'vue3-easy-data-table' ;
   import AddVocab from "./AddVocab.vue";
 
@@ -70,27 +70,33 @@
   const showOpt = ref(0)
 
   const deleteSelected = () => {
+    const toDelete = []
+
     for (const item of itemsSelected.value) {
-      delete vocab.value[item[toLang.toLowerCase()]]
+      delete vocab.value[item[toLang.value?.name?.toLowerCase()]]
+      toDelete.push({key: item[toLang.value?.name?.toLowerCase()]})
     }
 
-    useFetch('http://localhost:5000/vocab/delete_entry', ref(null), ref(null), "POST", itemsSelected.value, () => {
-      console.log("Deleted ")
+    useFetch2('http://localhost:5000/vocab/delete_entry', "POST", toDelete)
+    .catch(err => {
+      console.log(`Fetch returned error: ${err}`);
     })
+
+    for (const item of toDelete) {
+      delete vocab.value[item['key']]
+    }
+
   }
 
-  const delKey = ref("");
-  const err = ref(null)
   const deleteEntry = (item) => {
-    useFetch('http://localhost:5000/vocab/delete_entry', delKey, err, "POST", {"key": item[toLang.value.name?.toLowerCase()]}, () => {
-      if (err.value) {
-        console.log(err.value)
-      } else {
-        let res = delKey.value;
-        delete vocab.value[res['deleted']];
-        console.log(`Deleted ${res['deleted']}`)
-      }
-      
+
+    useFetch2('http://localhost:5000/vocab/delete_entry', "POST", {"key": item[toLang.value.name?.toLowerCase()]})
+    .then(res => {
+      delete vocab.value[res['deleted']];
+      console.log(`Deleted ${res['deleted']}`)
+    })
+    .catch( err => {
+      console.log(`Fetch returned error: ${err}`);
     })
   }
 
@@ -141,7 +147,7 @@
         </div>
 
         <span class="customize-page-input">
-          Go to page
+          Go to Page
           <input
             type="number"
             min="1" :max="maxPaginationNumber"
@@ -154,8 +160,8 @@
         </span>
       
         <div class="customize-pagination">
-          <button class="prev-page" @click="() => {currentPageNumber--; prevPage()}" :disabled="isFirstPage">prev page</button>
-          <button class="next-page" @click="() => {currentPageNumber++; nextPage()}" :disabled="isLastPage">next page</button>
+          <button class="prev-page" @click="() => {currentPageNumber--; prevPage()}" :disabled="isFirstPage">Prev Page</button>
+          <button class="next-page" @click="() => {currentPageNumber++; nextPage()}" :disabled="isLastPage">Next Page</button>
         </div>
       </div>
     </div>
@@ -185,6 +191,8 @@ header {
 .float-container {
     border: 3px solid #fff;
     padding: 20px;
+    display: grid;
+    grid-template-columns: 60% auto;
 }
 
 .float-child {

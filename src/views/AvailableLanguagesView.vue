@@ -121,7 +121,7 @@ watch(() => fromLang.value.name, (newv, oldv) => {
         </div>
 
         <span class="customize-page-input">
-          Go to page
+          Go to Page
           <input
             type="number"
             min="1" :max="maxPaginationNumber"
@@ -134,8 +134,8 @@ watch(() => fromLang.value.name, (newv, oldv) => {
         </span>
       
         <div class="customize-pagination">
-          <button class="prev-page" @click="() => {currentPageNumber--; prevPage()}" :disabled="isFirstPage">prev page</button>
-          <button class="next-page" @click="() => {currentPageNumber++; nextPage()}" :disabled="isLastPage">next page</button>
+          <button class="prev-page" @click="() => {currentPageNumber--; prevPage()}" :disabled="isFirstPage">Prev Page</button>
+          <button class="next-page" @click="() => {currentPageNumber++; nextPage()}" :disabled="isLastPage">Next Page</button>
         </div>
       </div>
     </div>
@@ -171,12 +171,14 @@ watch(() => fromLang.value.name, (newv, oldv) => {
 .float-container {
     border: 3px solid #fff;
     padding: 20px;
+    display: grid;
+    grid-template-columns: 60% auto;
 }
 
 .float-child {
     width: 640px;
     float: left;
-    padding: 10px;
+    padding: 20px;
 } 
 
 #deleteSelected {
