@@ -48,10 +48,8 @@
     const fromLang = inject("fromLang");
     const toLang = inject("toLang");
     const transResult = ref(null);
-    const errResult = ref(null);
 
     const vocab = inject("vocab");
-    const err = ref(null);
 
     let show = inject('show');
 
@@ -69,20 +67,16 @@
     }
 
     const postEntry = () => {
-        useFetch(`http://localhost:5000/vocab/add_entry`, transResult, errResult, "POST",
-            {
-                "from": fromWord.value.replace(/\,$/, ""),
-                "to": toWord.value
-            },
-            () => {
-                if (errResult.value) {
-                    console.log(`Add Entry call returned error: ${errResult.value}`);
-                } else {
-                    useFetch('http://localhost:5000/vocab/get_all', vocab, err, "GET", null, () => {
-                        closeModal();
-                    });
-                }
-            })
+        useFetch(
+            `http://localhost:5000/vocab/add_entry`, "POST",
+            {"from": fromWord.value.replace(/\,$/, ""), "to": toWord.value})
+        .then(res => {
+            transResult.value = res;
+            useFetch('http://localhost:5000/vocab/get_all', "GET")
+            .then(res => vocab.value = res)
+            .then(() => closeModal())
+            .catch(err => console.log(`Fetch returned error: ${err}`))
+        })
     }
 
     const lookup = () => {
@@ -107,13 +101,14 @@
             console.log("Invalid input. Both language inputs have content");
             return;
         }
-        useFetch(`http://localhost:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`, transResult, errResult, "GET", null, () => {
-            let res = transResult.value;
+
+        useFetch(`http://localhost:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`, "GET")
+        .then(res => {
             if ('result' in res) {
                 targetRef.value = res.result;
             }
-            
         })
+        .catch(err => console.log(`Fetch returned error: ${err}`));
     }
 
     const fromLangHint = computed( () => {
@@ -141,7 +136,8 @@
         msg.value = "";
         let l = newVal.split(",");
         for (let word of l) {
-            if (word.trim() != word) {
+            //Remove extraneous spaces from words in list except last one
+            if (word.trim() != word && word !== l.slice(-1)[0]) {
                 l[l.indexOf(word)] = word.trim();
             }
         }

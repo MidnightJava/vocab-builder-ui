@@ -2,7 +2,7 @@
   import { inject, computed, ref, provide } from 'vue';
   import { usePagination } from "use-vue3-easy-data-table";
 
-  import { useFetch2 } from "../components/fetch.js"
+  import { useFetch } from "../components/fetch.js"
   import  VocabTable from 'vue3-easy-data-table' ;
   import AddVocab from "./AddVocab.vue";
 
@@ -73,27 +73,31 @@
     const toDelete = []
 
     for (const item of itemsSelected.value) {
-      delete vocab.value[item[toLang.value?.name?.toLowerCase()]]
       toDelete.push({key: item[toLang.value?.name?.toLowerCase()]})
     }
 
-    useFetch2('http://localhost:5000/vocab/delete_entry', "POST", toDelete)
+    useFetch('http://localhost:5000/vocab/delete_entry', "POST", toDelete)
+    .then(() => {
+      useFetch('http://localhost:5000/vocab/get_all')
+      .then(res => {
+        itemsSelected.value = [];
+        vocab.value = res;
+      })
+    })
     .catch(err => {
       console.log(`Fetch returned error: ${err}`);
     })
-
-    for (const item of toDelete) {
-      delete vocab.value[item['key']]
-    }
 
   }
 
   const deleteEntry = (item) => {
 
-    useFetch2('http://localhost:5000/vocab/delete_entry', "POST", {"key": item[toLang.value.name?.toLowerCase()]})
-    .then(res => {
-      delete vocab.value[res['deleted']];
-      console.log(`Deleted ${res['deleted']}`)
+    useFetch('http://localhost:5000/vocab/delete_entry', "POST", {"key": item[toLang.value.name?.toLowerCase()]})
+    .then(() => {
+      useFetch('http://localhost:5000/vocab/get_all')
+      .then(res => {
+        vocab.value = res;
+      })
     })
     .catch( err => {
       console.log(`Fetch returned error: ${err}`);

@@ -63,10 +63,15 @@ const setFromId = inject("setFromIdFunc")
 const setToId = inject("setToIdFunc")
 
 const setDefRes = ref();
-const setDefErr = ref();
 
 const setDefaultLangs = () => {
-  useFetch(`http://localhost:5000/languages/set_defaults`, setDefRes, setDefErr, "POST", {"from": fromLang.value.name, "to": toLang.value.name})
+  useFetch(`http://localhost:5000/languages/set_defaults`, "POST", {"from": fromLang.value.name, "to": toLang.value.name})
+  .then(res => {
+    setDefRes.value = res;
+  })
+  .catch(err => {
+    console.log(`Fetch returned error: ${err}`);
+  })
 }
 
 const searchValue = ref("");

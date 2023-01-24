@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue';
-  import { useFetch2 } from './components/fetch.js'
+  import { useFetch } from './components/fetch.js'
   import  VocabTableView from './views/VocabTableView.vue' ;
   import FlashCardView from './views/FlashCardView.vue';
   import SettingsView from './views/SettingsView.vue';
@@ -31,24 +31,24 @@
   const tabs = Object.keys(compMap);
  
   const init = (fromLang, toLang) => {
-    useFetch2(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, "GET")
+    useFetch(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, "GET")
     .then( ()=> {
-      useFetch2('http://localhost:5000/languages/get', "GET")
+      useFetch('http://localhost:5000/languages/get', "GET")
       .then(res => {
         langs.value = res;
       })
       .then(() => {
         if (!Object.keys(defLangs.value).length) {
-          useFetch2('http://localhost:5000/languages/get_defaults')
+          useFetch('http://localhost:5000/languages/get_defaults')
           .then((res) => {
             defLangs.value = res;
-            useFetch2('http://localhost:5000/vocab/get_all')
+            useFetch('http://localhost:5000/vocab/get_all')
             .then(res => {
               vocab.value = res;
             })
           })
         } else {
-          useFetch2('http://localhost:5000/vocab/get_all')
+          useFetch('http://localhost:5000/vocab/get_all')
           .then(res => {
             vocab.value = res;
           })

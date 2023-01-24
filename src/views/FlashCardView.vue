@@ -18,33 +18,37 @@ const reverseWordOrder = ref(false);
 
 const wordCorrect = ref(true);
 
+const wordCount = ref(0);
+const totalWords = ref(0)
+
 /**
  * TODO:
  * Handle either word order. DONE
  * Set word red when marked incorrect DONE
- * Unselect words after they're deleted
- * Fnish porting useFecth to useFetch2
+ * Unselect words after they're deleted DONE
+ * Fnish porting useFecth to useFetch2 DONE
  * Implement server-side data for vocab table
  * Call server to mark word correct or incorrect and last correct time
  * Handle end of word list. Instruct to start again instead of using refresh word list button
+ * Show word number
  * Enhance card style and animation DONE
  * BugFix: preseve started state when switching tabs
  */
 
-const nextWordErr = ref();
-const nextWordRes = ref()
 const nextWord = () => {
 
   flipped.value = reverseWordOrder.value;
   wordCorrect.value = true;
 
-  useFetch("http://localhost:5000/vocab/next_word", nextWordRes, nextWordErr, "GET", null, () => {
-    if (nextWordErr.value) {
-      console.log(`Next Word Error: ${nextWordErr.value}`);
-    } else {
-      fromWord.value = nextWordRes.value.result;
-      translate();
-    }
+  useFetch("http://localhost:5000/vocab/next_word", "GET")
+  .then(res => {
+    fromWord.value = res.text;
+    wordCount.value = res.count;
+    totalWords.value = res.size;
+    translate();
+  })
+  .catch(err => {
+    console.log(`Fetch returned error: ${err}`);
   })
 }
 
@@ -77,31 +81,25 @@ const translate = () => {
   toWord.value = translated.join(",");
 }
 
-const selErr = ref();
 const selectWords = () => {
-  useFetch("http://localhost:5000/vocab/select_words", ref(), selErr, "GET", null, () => {
-    if (selErr.value) {
-      console.log(`Select Words Error: ${selErr.value}`);
-    } else {
-      nextWord();
-    }
+  useFetch("http://localhost:5000/vocab/select_words", "GET")
+  .then(() => nextWord())
+  .catch(err => {
+    console.log(`Fetch returned error: ${err}`);
   })
 }
 
-const setWordOrderErr = ref();
-
-const setWordOrder = callback => {
+const setWordOrder = () => {
  const wordOrder = reverseWordOrder.value ? "to-from" : "from-to";
-  useFetch("http://localhost:5000/vocab/set_word_order", ref(), setWordOrderErr, "POST", {"value": wordOrder}, callback);
+  useFetch("http://localhost:5000/vocab/set_word_order", "POST", {"value": wordOrder})
+  .then(() => nextWord())
+  .catch(err => {
+    console.log(`Fetch returned error: ${err}`);
+  })
 }
 
-watch(reverseWordOrder, () => {
-  setWordOrder(() => {
-  nextWord();
-  });
+watch(reverseWordOrder, setWordOrder);
   
-})
-
 onMounted( () => {
   selectWords()
 })
@@ -125,6 +123,7 @@ const correctAction = computed(() => {
           <div class="word"> {{ fromWord }}</div>
           <div class="btn-div">
             <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
+            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
           </div>
         </div>
         <div v-else class="card">
@@ -132,7 +131,8 @@ const correctAction = computed(() => {
           <div :class="wordCorrect ? 'word': 'word red-font'"> {{ toWord }}</div>
           <div class="btn-div">
             <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
-            <button id="mark-btn" @click="() => wordCorrect = !wordCorrect">{{ correctAction }}</button>
+            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
+            <div class="btn-wrapper"><button id="mark-btn" @click="() => wordCorrect = !wordCorrect">{{ correctAction }}</button></div>
           </div>
         </div>
       </template>
@@ -142,7 +142,8 @@ const correctAction = computed(() => {
           <div :class="wordCorrect ? 'word': 'word red-font'"> {{ toWord }}</div>
           <div class="btn-div">
             <font-awesome-icon   @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
-            <button id="mark-btn" @click="() => wordCorrect = !wordCorrect">{{ correctAction }}</button>
+            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
+            <div class="btn-wrapper"><button id="mark-btn" @click="() => wordCorrect = !wordCorrect">{{ correctAction }}</button></div>
           </div>
         </div>
         <div v-else class="card">
@@ -150,6 +151,7 @@ const correctAction = computed(() => {
           <div class="word"> {{ fromWord }}</div>
           <div class="btn-div">
             <font-awesome-icon  @click="() => {flipped = !flipped}" class="flip-btn" icon="fa-solid fa-rotate" />
+            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
           </div>
         </div>
       </template>
@@ -177,12 +179,19 @@ const correctAction = computed(() => {
     margin-top: 0px;
     padding-left: 20px;
     padding-right: 20px;
+    display: grid;
+    align-items: center;
+    grid-template-columns: 33% 33% 33%;
   }
 
+  .btn-wrapper {
+    display: grid;
+    align-items: center;
+  }
 
   .card {
     display: grid;
-    grid-template-rows: 10% 70% 20%;
+    grid-template-rows: 10% 70% auto;
     margin-top: 20px;
     text-align: center;
     font-size: 3.2rem;
@@ -192,6 +201,11 @@ const correctAction = computed(() => {
     margin-left: 10%;
     width: 80%;
     background-color: rgb(250, 250, 250);
+  }
+
+  .word-count {
+    font-size: 1.5rem;
+    color: gray;
   }
 
   .card-title {
@@ -223,12 +237,6 @@ const correctAction = computed(() => {
     cursor: pointer;
     position: relative;
     top: 105;
-  }
-
-  #mark-btn {
-    float: right;
-    position: relative;
-    top: 25%;
   }
 
   .word-order-div {
