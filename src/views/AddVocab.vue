@@ -16,10 +16,10 @@
       <div class="modal">
         <div id="subtitle">Enter text for either language or both</div>
         <div id="textDiv">
-            <input id="fromLangInp" :placeholder="fromLangHint" type="text" v-model="fromWord" />
-            <button @click="() => {fromWord = ''; msg = null}" :disabled="!fromWord.length">Clear</button>
+            <input id="fromLangInp" :placeholder="fromLangHint" type="text" v-model="fromWord" ref="fromWordEl" />
+            <button @click="() => {fromWord = ''; msg = ''}" :disabled="!fromWord.length">Clear</button>
             <input id="toLangInp" :placeholder="toLangHint" type="text" v-model="toWord" />
-            <button @click="() => {toWord = ''}" :disabled="!toWord.length">Clear</button>
+            <button @click="() => {toWord = ''; msg = ''}" :disabled="!toWord.length">Clear</button>
         </div>
         <div id="buttonDiv">
             <button :disabled="lookupDisabled" @click="lookup">Lookup Translation</button>
@@ -31,13 +31,15 @@
   </template>
   
   <script setup>
-    import { ref, computed, inject, watch } from 'vue'
+    import { ref, computed, inject, watch, onMounted, nextTick } from 'vue'
 
     import { useFetch } from '../components/fetch.js'
 
     import { Modal } from 'usemodal-vue3';
 
     const msg = ref("");
+
+    const fromWordEl = ref();
 
     const initialCap = inject('initialCap');
     let role = inject('role');
@@ -59,6 +61,7 @@
         toWord.value = "";
         show.value = true;
         msg.value = "";
+        nextTick(() => focusInput());
     }
 
     const closeModal = () => {
@@ -94,9 +97,16 @@
             word = fromWord.value;
             targetRef = toWord;
         } else if (toWord.value.length > 0 & fromWord.value.length == 0) {
-            [frl, tol] = [toLang.value.id, fromLang.value.id];
-            word = toWord.value;
-            targetRef = fromWord;
+            if (toWord.value.includes(",")) {
+                msg.value = "Use separate entries to specify multiple tranlations";
+                return;
+            } else {
+                msg.value = "";
+                [frl, tol] = [toLang.value.id, fromLang.value.id];
+                word = toWord.value;
+                targetRef = fromWord;
+            }
+            
         } else {
             console.log("Invalid input. Both language inputs have content");
             return;
@@ -145,6 +155,11 @@
             fromWord.value = l.join(",")
         }
     });
+
+    const focusInput = () => {
+        fromWordEl.value?.focus();
+    }
+
   </script>
   
   <style lang="scss">

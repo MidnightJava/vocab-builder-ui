@@ -11,7 +11,6 @@
   const langs = ref({});
   const defLangs = ref({});
   const vocab = ref(null);
-  const err = ref(null);
   const fromLang = ref({name: "", id: ""});
   const toLang = ref({name: "", id: ""});
   provide("langs", langs);
