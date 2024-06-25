@@ -1,118 +1,119 @@
 <script setup>
-  import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue';
-  import { useFetch } from './components/fetch.js'
-  import  VocabTableView from './views/VocabTableView.vue' ;
-  import FlashCardView from './views/FlashCardView.vue';
-  import SettingsView from './views/SettingsView.vue';
-  import AvailableLanguagesView from './views/AvailableLanguagesView.vue';
+import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue'
+import { useFetch } from './components/fetch.js'
+import VocabTableView from './views/VocabTableView.vue'
+import FlashCardView from './views/FlashCardView.vue'
+import SettingsView from './views/SettingsView.vue'
+import AvailableLanguagesView from './views/AvailableLanguagesView.vue'
 
-  let currentTab = ref("Available Languages");
+let currentTab = ref('Available Languages')
 
-  const langs = ref({});
-  const defLangs = ref({});
-  const vocab = ref(null);
-  const fromLang = ref({name: "", id: ""});
-  const toLang = ref({name: "", id: ""});
-  provide("langs", langs);
-  provide("vocab", vocab);
+const langs = ref({})
+const defLangs = ref({})
+const vocab = ref(null)
+const fromLang = ref({ name: '', id: '' })
+const toLang = ref({ name: '', id: '' })
+provide('langs', langs)
+provide('vocab', vocab)
 
+provide('fromLang', fromLang)
+provide('toLang', toLang)
 
-  provide("fromLang", fromLang);
-  provide("toLang", toLang);
-
-  const compMap = {
-    "Available Languages": AvailableLanguagesView,
-    "Saved Vocabulary": VocabTableView,
-    "Flash Cards": FlashCardView,
-    "Settings": SettingsView
-  }
-
-  const tabs = Object.keys(compMap);
- 
-  const init = (fromLang, toLang) => {
-    useFetch(`http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`, "GET")
-    .then( ()=> {
-      useFetch('http://localhost:5000/languages/get', "GET")
-      .then(res => {
-        langs.value = res;
-      })
-      .then(() => {
-        if (!Object.keys(defLangs.value).length) {
-          useFetch('http://localhost:5000/languages/get_defaults')
-          .then((res) => {
-            defLangs.value = res;
-            useFetch('http://localhost:5000/vocab/get_all')
-            .then(res => {
-              vocab.value = res;
-            })
-          })
-        } else {
-          useFetch('http://localhost:5000/vocab/get_all')
-          .then(res => {
-            vocab.value = res;
-          })
-        }
-      })
-    })
-    .catch(err => {
-      console.log(`fetch returned an error: ${err}`);
-    })
-  }
-
-  const currentTabComponent = computed(() => {
-    return compMap[currentTab.value]
-  })
-
-  const setFromId = (name) => {
-    let found = false;
-    for (let id of Object.keys(langs.value)) {
-      if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
-        fromLang.value.id = id;
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      fromLang.value.id = "";
-    }
+const compMap = {
+  'Available Languages': AvailableLanguagesView,
+  'Saved Vocabulary': VocabTableView,
+  'Flash Cards': FlashCardView,
+  Settings: SettingsView,
 }
 
-provide("setFromIdFunc", setFromId)
+const tabs = Object.keys(compMap)
 
-const setToId = (name) => {
-  let found = false;
+const init = (fromLang, toLang) => {
+  useFetch(
+    `http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`,
+    'GET'
+  )
+    .then(() => {
+      useFetch('http://localhost:5000/languages/get', 'GET')
+        .then(res => {
+          langs.value = res
+        })
+        .then(() => {
+          if (!Object.keys(defLangs.value).length) {
+            useFetch('http://localhost:5000/languages/get_defaults').then(
+              res => {
+                defLangs.value = res
+                useFetch('http://localhost:5000/vocab/get_all').then(res => {
+                  vocab.value = res
+                })
+              }
+            )
+          } else {
+            useFetch('http://localhost:5000/vocab/get_all').then(res => {
+              vocab.value = res
+            })
+          }
+        })
+    })
+    .catch(err => {
+      console.log(`fetch returned an error: ${err}`)
+    })
+}
+
+const currentTabComponent = computed(() => {
+  return compMap[currentTab.value]
+})
+
+const setFromId = name => {
+  let found = false
   for (let id of Object.keys(langs.value)) {
     if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
-      toLang.value.id = id;
-      found = true;
-      break;
+      fromLang.value.id = id
+      found = true
+      break
     }
   }
   if (!found) {
-    toLang.value.id = "";
+    fromLang.value.id = ''
   }
 }
 
-provide("setToIdFunc", setToId)
+provide('setFromIdFunc', setFromId)
 
-const initialCap = (s) => {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+const setToId = name => {
+  let found = false
+  for (let id of Object.keys(langs.value)) {
+    if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
+      toLang.value.id = id
+      found = true
+      break
+    }
+  }
+  if (!found) {
+    toLang.value.id = ''
+  }
 }
 
-provide('initialCap', initialCap);
+provide('setToIdFunc', setToId)
 
-watch(defLangs, (newVal) => {
-  fromLang.value.name = initialCap(newVal.from);
-  setFromId(newVal.from);
-  toLang.value.name = initialCap(newVal.to);
-  setToId(newVal.to);
-});
+const initialCap = s => {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+provide('initialCap', initialCap)
+
+watch(defLangs, newVal => {
+  fromLang.value.name = initialCap(newVal.from)
+  setFromId(newVal.from)
+  toLang.value.name = initialCap(newVal.to)
+  setToId(newVal.to)
+})
 
 onMounted(() => {
   watchEffect(async () => {
-    init(fromLang, toLang);
+    init(fromLang, toLang)
   })
-});
+})
 </script>
 
 <template>
@@ -133,7 +134,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
 .tab-button {
   padding: 6px 10px;
   border-top-left-radius: 3px;

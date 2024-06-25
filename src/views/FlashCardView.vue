@@ -37,6 +37,8 @@ const totalWords = ref(0)
 
 const nextWord = () => {
 
+  if (wordCorrect.value) markCorrect();
+  
   flipped.value = reverseWordOrder.value;
   wordCorrect.value = true;
 
@@ -79,6 +81,11 @@ const translate = () => {
     }
   }
   toWord.value = translated.join(",");
+}
+
+const markCorrect = () => {
+  useFetch("http://localhost:5000/vocab/mark_correct", "POST", {"text": toWord.value})
+  .catch((err) => `Fetch returned error ${err}`)
 }
 
 const selectWords = () => {
