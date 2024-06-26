@@ -1,211 +1,253 @@
 <template>
-      <button @click="showModal">Add Entry</button>
-    <!-- If the option changed modal component the name
+  <button @click="showModal">Add Entry</button>
+  <!-- If the option changed modal component the name
     <MyModal>
     -->
-    <Modal
-        v-model:visible="show"
-        :width="500"
-        :title="title"
-        :closable="false"
-        :cancelButton="{text: 'Close', onclick: closeModal, loading: false}"
-        :draggable="true"
-        :mask="true"
-        :animation="true"
-    >
-      <div class="modal">
-        <div id="subtitle">Enter text for either language or both</div>
-        <div id="textDiv">
-            <input id="fromLangInp" :placeholder="fromLangHint" type="text" v-model="fromWord" ref="fromWordEl" />
-            <button @click="() => {fromWord = ''; msg = ''}" :disabled="!fromWord.length">Clear</button>
-            <input id="toLangInp" :placeholder="toLangHint" type="text" v-model="toWord" />
-            <button @click="() => {toWord = ''; msg = ''}" :disabled="!toWord.length">Clear</button>
-        </div>
-        <div id="buttonDiv">
-            <button :disabled="lookupDisabled" @click="lookup">Lookup Translation</button>
-            <button  :disabled="submitDisabled" @click="postEntry()">Submit</button>
-        </div>
-        <div id="errMsg">{{ msg }}</div>
+  <Modal
+    v-model:visible="show"
+    :width="500"
+    :title="title"
+    :closable="false"
+    :cancelButton="{ text: 'Close', onclick: closeModal, loading: false }"
+    :draggable="true"
+    :mask="true"
+    :animation="true"
+  >
+    <div class="modal">
+      <div id="subtitle">Enter text for either language or both</div>
+      <div id="textDiv">
+        <input
+          id="fromLangInp"
+          :placeholder="fromLangHint"
+          type="text"
+          v-model="fromWord"
+          ref="fromWordEl"
+        />
+        <button
+          @click="
+            () => {
+              fromWord = ''
+              msg = ''
+            }
+          "
+          :disabled="!fromWord.length"
+        >
+          Clear
+        </button>
+        <input
+          id="toLangInp"
+          :placeholder="toLangHint"
+          type="text"
+          v-model="toWord"
+        />
+        <button
+          @click="
+            () => {
+              toWord = ''
+              msg = ''
+            }
+          "
+          :disabled="!toWord.length"
+        >
+          Clear
+        </button>
       </div>
-    </Modal>
-  </template>
-  
-  <script setup>
-    import { ref, computed, inject, watch, onMounted, nextTick } from 'vue'
+      <div id="buttonDiv">
+        <button :disabled="lookupDisabled" @click="lookup">
+          Lookup Translation
+        </button>
+        <button :disabled="submitDisabled" @click="postEntry()">Submit</button>
+      </div>
+      <div id="errMsg">{{ msg }}</div>
+    </div>
+  </Modal>
+</template>
 
-    import { useFetch } from '../components/fetch.js'
+<script setup>
+import { ref, computed, inject, watch, nextTick } from 'vue'
 
-    import { Modal } from 'usemodal-vue3';
+import { useFetch } from '../components/fetch.js'
 
-    const msg = ref("");
+import { Modal } from 'usemodal-vue3'
 
-    const fromWordEl = ref();
+const msg = ref('')
 
-    const initialCap = inject('initialCap');
-    let role = inject('role');
+const fromWordEl = ref()
 
-    const fromWord = inject('fromWord');
-    const toWord = inject('toWord');
+const initialCap = inject('initialCap')
+let role = inject('role')
 
-    const fromLang = inject("fromLang");
-    const toLang = inject("toLang");
-    const transResult = ref(null);
+const fromWord = inject('fromWord')
+const toWord = inject('toWord')
 
-    const vocab = inject("vocab");
+const fromLang = inject('fromLang')
+const toLang = inject('toLang')
+const transResult = ref(null)
 
-    let show = inject('show');
+const vocab = inject('vocab')
 
-    const showModal = () => {
-        role.value = 'add';
-        fromWord.value = "";
-        toWord.value = "";
-        show.value = true;
-        msg.value = "";
-        nextTick(() => focusInput());
+let show = inject('show')
+
+const showModal = () => {
+  role.value = 'add'
+  fromWord.value = ''
+  toWord.value = ''
+  show.value = true
+  msg.value = ''
+  nextTick(() => focusInput())
+}
+
+const closeModal = () => {
+  show.value = false
+  msg.value = ''
+}
+
+const postEntry = () => {
+  useFetch(
+    `http://localhost:5000/vocab/${
+      role.value === 'add' ? 'add_entry' : 'update_entry'
+    }`,
+    'POST',
+    {
+      from: fromWord.value.replace(/,$/, ''),
+      to: toWord.value,
     }
+  ).then(res => {
+    transResult.value = res
+    useFetch('http://localhost:5000/vocab/get_all', 'GET')
+      .then(res => (vocab.value = res))
+      .then(() => closeModal())
+      .catch(err => console.log(`Fetch returned error: ${err}`))
+  })
+}
 
-    const closeModal = () => {
-       show.value = false;
-       msg.value = "";
+const lookup = () => {
+  let word = null
+  let [frl, tol] = [null, null]
+  let targetRef = null
+  if ((fromWord.value.length > 0) & (toWord.value.length == 0)) {
+    if (fromWord.value.includes(',')) {
+      msg.value = 'Multiple words are for manual entry only'
+      return
+    } else {
+      msg.value = ''
     }
-
-    const postEntry = () => {
-        useFetch(
-            `http://localhost:5000/vocab/add_entry`, "POST",
-            {"from": fromWord.value.replace(/\,$/, ""), "to": toWord.value})
-        .then(res => {
-            transResult.value = res;
-            useFetch('http://localhost:5000/vocab/get_all', "GET")
-            .then(res => vocab.value = res)
-            .then(() => closeModal())
-            .catch(err => console.log(`Fetch returned error: ${err}`))
-        })
+    ;[frl, tol] = [fromLang.value.id, toLang.value.id]
+    word = fromWord.value
+    targetRef = toWord
+  } else if ((toWord.value.length > 0) & (fromWord.value.length == 0)) {
+    if (toWord.value.includes(',')) {
+      msg.value = 'Use separate entries to specify multiple tranlations'
+      return
+    } else {
+      msg.value = ''
+      ;[frl, tol] = [toLang.value.id, fromLang.value.id]
+      word = toWord.value
+      targetRef = fromWord
     }
+  } else {
+    console.log('Invalid input. Both language inputs have content')
+    return
+  }
 
-    const lookup = () => {
-        let word = null;
-        let [frl, tol] = [null, null]
-        let targetRef = null;
-        if (fromWord.value.length > 0 & toWord.value.length == 0) {
-            if (fromWord.value.includes(",")) {
-                msg.value = "Multiple words are for manual entry only";
-                return;
-            } else {
-                msg.value = "";
-            }
-            [frl, tol] = [fromLang.value.id, toLang.value.id];
-            word = fromWord.value;
-            targetRef = toWord;
-        } else if (toWord.value.length > 0 & fromWord.value.length == 0) {
-            if (toWord.value.includes(",")) {
-                msg.value = "Use separate entries to specify multiple tranlations";
-                return;
-            } else {
-                msg.value = "";
-                [frl, tol] = [toLang.value.id, fromLang.value.id];
-                word = toWord.value;
-                targetRef = fromWord;
-            }
-            
-        } else {
-            console.log("Invalid input. Both language inputs have content");
-            return;
-        }
-
-        useFetch(`http://localhost:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`, "GET")
-        .then(res => {
-            if ('result' in res) {
-                targetRef.value = res.result;
-            }
-        })
-        .catch(err => console.log(`Fetch returned error: ${err}`));
-    }
-
-    const fromLangHint = computed( () => {
-        return `Enter ${fromLang.value.name} word or phrase`;
+  useFetch(
+    `http://localhost:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`,
+    'GET'
+  )
+    .then(res => {
+      if ('result' in res) {
+        targetRef.value = res.result
+      }
     })
+    .catch(err => console.log(`Fetch returned error: ${err}`))
+}
 
-    const toLangHint = computed( () => {
-        return `Enter ${toLang.value.name} word or phrase`;
-    })
+const fromLangHint = computed(() => {
+  return `Enter ${fromLang.value.name} word or phrase`
+})
 
-    const lookupDisabled = computed( () => {
-        return  (fromWord.value.length > 0 && toWord.value.length > 0) ||
-                (fromWord.value.length === 0 && toWord.value.length == 0);
-    })
+const toLangHint = computed(() => {
+  return `Enter ${toLang.value.name} word or phrase`
+})
 
-    const submitDisabled = computed( () => {
-        return  fromWord.value.length === 0 || toWord.value.length === 0
-    })
+const lookupDisabled = computed(() => {
+  return (
+    (fromWord.value.length > 0 && toWord.value.length > 0) ||
+    (fromWord.value.length === 0 && toWord.value.length == 0)
+  )
+})
 
-    const title = computed( () => {
-        return `${initialCap(role.value)} Vocabulary Entry`
-    })
+const submitDisabled = computed(() => {
+  return fromWord.value.length === 0 || toWord.value.length === 0
+})
 
-    watch(fromWord, newVal => {
-        msg.value = "";
-        let l = newVal.split(",");
-        for (let word of l) {
-            //Remove extraneous spaces from words in list except last one
-            if (word.trim() != word && word !== l.slice(-1)[0]) {
-                l[l.indexOf(word)] = word.trim();
-            }
-        }
-        if (l != newVal.split(",")) {
-            fromWord.value = l.join(",")
-        }
-    });
+const title = computed(() => {
+  return `${initialCap(role.value)} Vocabulary Entry`
+})
 
-    const focusInput = () => {
-        fromWordEl.value?.focus();
+watch(fromWord, newVal => {
+  msg.value = ''
+  let l = newVal.split(',')
+  for (let word of l) {
+    //Remove extraneous spaces from words in list except last one
+    if (word.trim() != word && word !== l.slice(-1)[0]) {
+      l[l.indexOf(word)] = word.trim()
     }
+  }
+  if (l != newVal.split(',')) {
+    fromWord.value = l.join(',')
+  }
+})
 
-  </script>
-  
-  <style lang="scss">
-    .modal {
-        width: 450px;
-        padding: 10px;
-        box-sizing: border-box;
-        background-color: #fff;
-        font-size: 20px;
-        text-align: center;
-        height: 100%;
-    }
+const focusInput = () => {
+  fromWordEl.value?.focus()
+}
+</script>
 
-    input[type=text] {
-        margin-bottom: 5px;
-        margin-right: 5px;
-        width: 330px;
-    }
+<style lang="scss">
+.modal {
+  width: 450px;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  font-size: 20px;
+  text-align: center;
+  height: 100%;
+}
 
-    button {
-        margin-top: 5px;
-        margin-right: 5px;
-    }
-    
-    #buttonDiv {
-        display: flex;
-        justify-content: left;
-        margin-left: 5px;
-        padding-left: 15px;
-    }
+input[type='text'] {
+  margin-bottom: 5px;
+  margin-right: 5px;
+  width: 330px;
+}
 
-    #textDiv {
-        margin-top: 10px;
-    }
+button {
+  margin-top: 5px;
+  margin-right: 5px;
+}
 
-    #subtitle {
-        font-size: 0.8em;
-    }
+#buttonDiv {
+  display: flex;
+  justify-content: left;
+  margin-left: 5px;
+  padding-left: 15px;
+}
 
-    .modal-vue3-footer-ok {
-        display: none !important;
-    }
+#textDiv {
+  margin-top: 10px;
+}
 
-    #errMsg {
-        margin-top: 10px;
-        height: 10px;
-        font-size: 0.8rem;
-    }
-  </style>
+#subtitle {
+  font-size: 0.8em;
+}
+
+.modal-vue3-footer-ok {
+  display: none !important;
+}
+
+#errMsg {
+  margin-top: 10px;
+  height: 10px;
+  font-size: 0.8rem;
+}
+</style>
