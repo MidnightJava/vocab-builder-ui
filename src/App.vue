@@ -17,13 +17,18 @@ const vocab = ref(null)
 const fromLang = ref({ name: '', id: '' })
 const toLang = ref({ name: '', id: '' })
 const connected = ref(false)
+const lookup = ref(false)
+const minCorrect = ref(5)
+const minAge = ref(15)
+
 provide('langs', langs)
 provide('vocab', vocab)
 provide('fromLang', fromLang)
 provide('toLang', toLang)
 provide('connected', connected)
-
-const noshow = false
+provide('lookup', lookup)
+provide('minCorrect', minCorrect)
+provide('minAge', minAge)
 
 const compMap = {
   'Available Languages': AvailableLanguagesView,
@@ -36,7 +41,7 @@ const tabs = Object.keys(compMap)
 
 const init = async (fromLang, toLang) => {
   await useFetch.value.fetch(
-    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}`,
+    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}`,
     'GET'
   )
   let res = await useFetch.value.fetch(
@@ -139,7 +144,9 @@ onMounted(() => {
         {{ tab }}
       </button>
     </div>
-    <component v-bind:is="currentTabComponent" class="tab"></component>
+    <KeepAlive>
+      <component v-bind:is="currentTabComponent" class="tab"></component>
+    </KeepAlive>
     <div class="reconnect-panel" v-if="!connected">
       <div class="reconnect-label">Lost server connection</div>
       <button
