@@ -2,8 +2,9 @@
 import { inject, computed, ref, watch } from 'vue'
 import LangsTable from 'vue3-easy-data-table'
 import { usePagination } from 'use-vue3-easy-data-table'
-import { useFetch } from '../components/fetch'
-import { styled } from '@vvibe/vue-styled-components'
+import UseFetch from '../components/UseFetch.vue'
+
+const useFetch = ref(null)
 
 const dataTable = ref()
 
@@ -13,11 +14,6 @@ const currentPageNumber = ref(1)
 
 const fromLang = inject('fromLang')
 const toLang = inject('toLang')
-
-const ContainerDiv = styled('div')`
-  display: flex;
-  flex-direction: row;
-`
 
 const {
   currentPageFirstIndex,
@@ -72,17 +68,16 @@ const setToId = inject('setToIdFunc')
 
 const setDefRes = ref()
 
-const setDefaultLangs = () => {
-  useFetch(`http://localhost:5000/languages/set_defaults`, 'POST', {
-    from: fromLang.value.name,
-    to: toLang.value.name,
-  })
-    .then(res => {
-      setDefRes.value = res
-    })
-    .catch(err => {
-      console.log(`Fetch returned error: ${err}`)
-    })
+const setDefaultLangs = async () => {
+  const res = await useFetch.value.fetch(
+    `http://localhost:5000/languages/set_defaults`,
+    'POST',
+    {
+      from: fromLang.value.name,
+      to: toLang.value.name,
+    }
+  )
+  setDefRes.value = res
 }
 
 const searchValue = ref('')
@@ -109,7 +104,8 @@ watch(
 </script>
 
 <template>
-  <ContainerDiv>
+  <UseFetch ref="useFetch" />
+  <div class="float-container">
     <div class="float-child mx-2">
       <input type="text" placeholder="Search" v-model="searchValue" />
       <div>
@@ -246,15 +242,15 @@ watch(
         </div>
       </div>
     </div>
-  </ContainerDiv>
+  </div>
 </template>
 
 <style scoped>
 .float-container {
   border: 3px solid #fff;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: 60% auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
 }
 
 .float-child {

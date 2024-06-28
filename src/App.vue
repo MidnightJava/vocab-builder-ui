@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue'
-import { useFetch } from './components/fetch.js'
+import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
 import SettingsView from './views/SettingsView.vue'
@@ -8,16 +8,22 @@ import AvailableLanguagesView from './views/AvailableLanguagesView.vue'
 
 let currentTab = ref('Available Languages')
 
+const useFetch = ref(null)
+const flashCardView = ref(null)
+
 const langs = ref({})
 const defLangs = ref({})
 const vocab = ref(null)
 const fromLang = ref({ name: '', id: '' })
 const toLang = ref({ name: '', id: '' })
+const connected = ref(false)
 provide('langs', langs)
 provide('vocab', vocab)
-
 provide('fromLang', fromLang)
 provide('toLang', toLang)
+provide('connected', connected)
+
+const noshow = false
 
 const compMap = {
   'Available Languages': AvailableLanguagesView,
@@ -28,36 +34,30 @@ const compMap = {
 
 const tabs = Object.keys(compMap)
 
-const init = (fromLang, toLang) => {
-  useFetch(
-    `http://localhost:5000/init?from_lang=${fromLang.value.id}&to_lang=${toLang.value.id}`,
+const init = async (fromLang, toLang) => {
+  await useFetch.value.fetch(
+    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}`,
     'GET'
   )
-    .then(() => {
-      useFetch('http://localhost:5000/languages/get', 'GET')
-        .then(res => {
-          langs.value = res
-        })
-        .then(() => {
-          if (!Object.keys(defLangs.value).length) {
-            useFetch('http://localhost:5000/languages/get_defaults').then(
-              res => {
-                defLangs.value = res
-                useFetch('http://localhost:5000/vocab/get_all').then(res => {
-                  vocab.value = res
-                })
-              }
-            )
-          } else {
-            useFetch('http://localhost:5000/vocab/get_all').then(res => {
-              vocab.value = res
-            })
-          }
-        })
-    })
-    .catch(err => {
-      console.log(`fetch returned an error: ${err}`)
-    })
+  let res = await useFetch.value.fetch(
+    'http://localhost:5000/languages/get',
+    'GET'
+  )
+  langs.value = res
+  if (!Object.keys(defLangs.value).length) {
+    res = await useFetch.value.fetch(
+      'http://localhost:5000/languages/get_defaults'
+    )
+    defLangs.value = res
+    res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all')
+    vocab.value = res
+  } else {
+    res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all')
+    vocab.value = res
+  }
+  flashCardView.value.selectWords()
+  currentTab.value = 'Available Languages'
+  // connected.value = true
 }
 
 const currentTabComponent = computed(() => {
@@ -109,14 +109,25 @@ watch(defLangs, newVal => {
   setToId(newVal.to)
 })
 
+watch(connected, newVal => {
+  if (newVal == false) {
+    console.log('Disconnected')
+    // init(fromLang, toLang)
+  }
+})
+
 onMounted(() => {
   watchEffect(async () => {
-    init(fromLang, toLang)
+    init(fromLang.value, toLang.value)
   })
 })
 </script>
 
 <template>
+  <UseFetch ref="useFetch" />
+  <div v-show="false">
+    <FlashCardView ref="flashCardView" />
+  </div>
   <div id="top-level-app">
     <div class="top-nav">
       <button
@@ -128,12 +139,39 @@ onMounted(() => {
         {{ tab }}
       </button>
     </div>
-
     <component v-bind:is="currentTabComponent" class="tab"></component>
+    <div class="reconnect-panel" v-if="!connected">
+      <div class="reconnect-label">Lost server connection</div>
+      <button
+        class="reconnect-button"
+        @click="
+          () => {
+            init(fromLang, toLang)
+          }
+        "
+      >
+        Reconnect
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.reconnect-panel {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+}
+.reconnect-button {
+  margin-left: 20px;
+  margin-top: auto;
+  border-radius: 3px;
+  color: blue;
+}
+.reconnect-label {
+  margin-top: auto;
+  color: red;
+}
 .tab-button {
   padding: 6px 10px;
   border-top-left-radius: 3px;
@@ -145,22 +183,22 @@ onMounted(() => {
   margin-right: -1px;
 }
 .tab-button:hover {
-  background: #e0e0e0;
+  background: #fff;
 }
 .tab-button.active {
-  background: #e0e0e0;
+  background: lightblue;
 }
 .tab {
   padding: 10px;
   background-color: rgb(240, 240, 240);
-  width: 80%;
-  margin-left: 10%;
+  width: 100%;
+  margin: auto;
 }
 #top-level-app {
   height: 80%;
   padding-top: 50px;
   padding-bottom: 50px;
-  margin-left: 10%;
+  margin: auto;
   width: 80%;
 }
 

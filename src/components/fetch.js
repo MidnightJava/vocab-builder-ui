@@ -1,27 +1,20 @@
-
-export function useFetch(url, method="GET", payload=null) {
-
-  const opts = {method}
+export const useFetch = async (url, method = 'GET', payload = null) => {
+  const opts = { method }
   if (payload) {
     opts.headers = {
       'Content-Type': 'application/json',
     }
-    opts.body = JSON.stringify(payload);
+    opts.body = JSON.stringify(payload)
   }
+  const res = await fetch(url, opts)
+  if (res.status != 200) {
+    return res.statusText
+  }
+  // if (Error in res) {
+  //   connected.value = false
+  // } else {
+  //   connected.value = true
+  // }
 
-  return new Promise((resolve, reject) => {
-    fetch(url, opts)
-    .then((res) => {
-      if (res.status != 200) {
-        reject(res.statusText);
-      }
-      resolve(res.json());
-    })
-    .catch((err) => {
-        reject(err);
-    })
-
-  })
-
-  
+  return res.json()
 }

@@ -2,9 +2,11 @@
 import { inject, computed, ref, provide } from 'vue'
 import { usePagination } from 'use-vue3-easy-data-table'
 
-import { useFetch } from '../components/fetch.js'
+import UseFetch from '../components/UseFetch.vue'
 import VocabTable from 'vue3-easy-data-table'
 import AddVocab from './AddVocab.vue'
+
+const useFetch = ref(null)
 
 const dataTable = ref()
 
@@ -89,37 +91,34 @@ const searchField = ref([
 const itemsSelected = ref([])
 const showOpt = ref(0)
 
-const deleteSelected = () => {
+const deleteSelected = async () => {
   const toDelete = []
 
   for (const item of itemsSelected.value) {
     toDelete.push({ key: item[toLang.value?.name?.toLowerCase()] })
   }
 
-  useFetch('http://localhost:5000/vocab/delete_entry', 'POST', toDelete)
-    .then(() => {
-      useFetch('http://localhost:5000/vocab/get_all').then(res => {
-        itemsSelected.value = []
-        vocab.value = res
-      })
-    })
-    .catch(err => {
-      console.log(`Fetch returned error: ${err}`)
-    })
+  await useFetch.value.fetch(
+    'http://localhost:5000/vocab/delete_entry',
+    'POST',
+    toDelete
+  )
+  const res = await useFetch('http://localhost:5000/vocab/get_all')
+  vocab.value = res
+  itemsSelected.value = []
+  vocab.value = res
 }
 
-const deleteEntry = item => {
-  useFetch('http://localhost:5000/vocab/delete_entry', 'POST', {
-    key: item[toLang.value.name?.toLowerCase()],
-  })
-    .then(() => {
-      useFetch('http://localhost:5000/vocab/get_all').then(res => {
-        vocab.value = res
-      })
-    })
-    .catch(err => {
-      console.log(`Fetch returned error: ${err}`)
-    })
+const deleteEntry = async item => {
+  await useFetch.value.fetch(
+    'http://localhost:5000/vocab/delete_entry',
+    'POST',
+    {
+      key: item[toLang.value.name?.toLowerCase()],
+    }
+  )
+  const res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all')
+  vocab.value = res
 }
 
 const editEntry = item => {
@@ -131,6 +130,7 @@ const editEntry = item => {
 </script>
 
 <template>
+  <UseFetch ref="useFetch" />
   <div class="float-container">
     <div class="float-child">
       <VocabTable

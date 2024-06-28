@@ -1,7 +1,9 @@
 <script setup>
 import { inject, ref, watch, onMounted, computed } from 'vue'
 import { VueFlip } from 'vue-flip'
-import { useFetch } from '../components/fetch.js'
+import UseFetch from '../components/UseFetch.vue'
+
+const useFetch = ref(null)
 
 const fromLang = inject('fromLang')
 const toLang = inject('toLang')
@@ -34,22 +36,37 @@ const totalWords = ref(0)
  * BugFix: preseve started state when switching tabs
  */
 
-const nextWord = () => {
+const selectWords = async () => {
+  await useFetch.value.fetch('http://localhost:5000/vocab/select_words', 'GET')
+}
+
+defineExpose({ selectWords })
+const nextWord = async () => {
   if (wordCorrect.value) markCorrect()
 
   flipped.value = reverseWordOrder.value
   wordCorrect.value = true
 
-  useFetch('http://localhost:5000/vocab/next_word', 'GET')
-    .then(res => {
+  try {
+    const res = await useFetch.value.fetch(
+      'http://localhost:5000/vocab/next_word',
+      'GET'
+    )
+    if ('Error' in res) {
+      console.log(`Error calling next_word: ${res.Error}`)
+      // connected.value = false
+      throw Error()
+    } else {
       fromWord.value = res.text
       wordCount.value = res.count
       totalWords.value = res.size
       translate()
-    })
-    .catch(err => {
-      console.log(`Fetch returned error: ${err}`)
-    })
+      // connected.value = true
+    }
+  } catch (err) {
+    // connected.value = false
+    console.log(`Fetch call failed`)
+  }
 }
 
 const translate = () => {
@@ -81,35 +98,33 @@ const translate = () => {
   toWord.value = translated.join(', ')
 }
 
-const markCorrect = () => {
-  useFetch('http://localhost:5000/vocab/mark_correct', 'POST', {
-    text: toWord.value,
-  }).catch(err => `Fetch returned error ${err}`)
+const markCorrect = async () => {
+  await useFetch.value.fetch(
+    'http://localhost:5000/vocab/mark_correct',
+    'POST',
+    {
+      text: toWord.value,
+    }
+  )
 }
 
-const selectWords = () => {
-  useFetch('http://localhost:5000/vocab/select_words', 'GET')
-    .then(() => nextWord())
-    .catch(err => {
-      console.log(`Fetch returned error: ${err}`)
-    })
-}
-
-const setWordOrder = () => {
+const setWordOrder = async () => {
   const wordOrder = reverseWordOrder.value ? 'to-from' : 'from-to'
-  useFetch('http://localhost:5000/vocab/set_word_order', 'POST', {
-    value: wordOrder,
-  })
-    .then(() => nextWord())
-    .catch(err => {
-      console.log(`Fetch returned error: ${err}`)
-    })
+  await useFetch.value.fetch(
+    'http://localhost:5000/vocab/set_word_order',
+    'POST',
+    {
+      value: wordOrder,
+    }
+  )
+  nextWord()
 }
 
 watch(reverseWordOrder, setWordOrder)
 
 onMounted(() => {
   selectWords()
+  nextWord()
 })
 
 const correctAction = computed(() => {
@@ -118,6 +133,7 @@ const correctAction = computed(() => {
 </script>
 
 <template>
+  <UseFetch ref="useFetch" />
   <div>
     <vue-flip v-model="flipped" width="700px" height="400px" class="container">
       <template v-slot:front>

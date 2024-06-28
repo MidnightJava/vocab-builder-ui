@@ -1,4 +1,5 @@
 <template>
+  <UseFetch ref="useFetch" />
   <button @click="showModal">Add Entry</button>
   <!-- If the option changed modal component the name
     <MyModal>
@@ -66,7 +67,9 @@
 <script setup>
 import { ref, computed, inject, watch, nextTick } from 'vue'
 
-import { useFetch } from '../components/fetch.js'
+const useFetch = ref(null)
+
+import UseFetch from '../components/UseFetch.vue'
 
 import { Modal } from 'usemodal-vue3'
 
@@ -102,8 +105,8 @@ const closeModal = () => {
   msg.value = ''
 }
 
-const postEntry = () => {
-  useFetch(
+const postEntry = async () => {
+  let res = await useFetch.value.fetch(
     `http://localhost:5000/vocab/${
       role.value === 'add' ? 'add_entry' : 'update_entry'
     }`,
@@ -112,16 +115,15 @@ const postEntry = () => {
       from: fromWord.value.replace(/,$/, ''),
       to: toWord.value,
     }
-  ).then(res => {
-    transResult.value = res
-    useFetch('http://localhost:5000/vocab/get_all', 'GET')
-      .then(res => (vocab.value = res))
-      .then(() => closeModal())
-      .catch(err => console.log(`Fetch returned error: ${err}`))
-  })
+  )
+  transResult.value = res
+
+  res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all', 'GET')
+  vocab.value = res
+  closeModal()
 }
 
-const lookup = () => {
+const lookup = async () => {
   let word = null
   let [frl, tol] = [null, null]
   let targetRef = null
@@ -150,16 +152,13 @@ const lookup = () => {
     return
   }
 
-  useFetch(
+  const res = await useFetch.value.fetch(
     `http://localhost:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`,
     'GET'
   )
-    .then(res => {
-      if ('result' in res) {
-        targetRef.value = res.result
-      }
-    })
-    .catch(err => console.log(`Fetch returned error: ${err}`))
+  if ('result' in res) {
+    targetRef.value = res.result
+  }
 }
 
 const fromLangHint = computed(() => {
