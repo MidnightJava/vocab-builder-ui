@@ -22,6 +22,22 @@ const wordCorrect = ref(true)
 const wordCount = ref(0)
 const totalWords = ref(0)
 
+const minCorrect = inject('minCorrect')
+const minAge = inject('minAge')
+let _minCorrect = ref(5)
+let _minAge = ref(15)
+
+const applyChanges = () => {
+  minCorrect.value = _minCorrect.value
+  minAge.value = _minAge.value
+}
+
+const changesPending = computed(() => {
+  return (
+    minCorrect.value !== _minCorrect.value || minAge.value !== _minAge.value
+  )
+})
+
 /**
  * TODO:
  * Handle either word order. DONE
@@ -134,92 +150,144 @@ const correctAction = computed(() => {
 
 <template>
   <UseFetch ref="useFetch" />
-  <div>
-    <vue-flip v-model="flipped" width="700px" height="400px" class="container">
-      <template v-slot:front>
-        <div v-if="!reverseWordOrder" class="card">
-          <div class="card-title">Original</div>
-          <div class="word">{{ fromWord }}</div>
-          <div class="btn-div">
-            <font-awesome-icon
-              @click="
-                () => {
-                  flipped = !flipped
-                }
-              "
-              class="flip-btn"
-              icon="fa-solid fa-rotate"
-            />
-            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
-          </div>
+  <div class="container">
+    <div class="center-container">
+      <div class="block">
+        <legend>Word Selection Criteria</legend>
+        <div class="row">
+          <label class="left-label" for="minCorrect">Less than</label>
+          <input
+            type="number"
+            id="minCorrect"
+            value="5"
+            v-model="_minCorrect"
+          />
+          <label class="right-label" for="minCorrect"
+            >consecutive correct</label
+          >
         </div>
-        <div v-else class="card">
-          <div class="card-title">Translation</div>
-          <div :class="wordCorrect ? 'word' : 'word red-font'">
-            {{ toWord }}
-          </div>
-          <div class="btn-div">
-            <font-awesome-icon
-              @click="
-                () => {
-                  flipped = !flipped
-                }
-              "
-              class="flip-btn"
-              icon="fa-solid fa-rotate"
-            />
-            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
-            <div class="btn-wrapper">
-              <button id="mark-btn" @click="() => (wordCorrect = !wordCorrect)">
-                {{ correctAction }}
-              </button>
+        <div class="row">
+          <label class="left-label" for="minAge">Last correct at least</label>
+          <input type="number" id="minAge" value="15" v-model="_minAge" />
+          <label class="right-label" for="minAge">days ago</label>
+        </div>
+        <div class="row">
+          <button
+            class="button"
+            @click="applyChanges"
+            :disabled="!changesPending"
+          >
+            Apply Changes
+          </button>
+        </div>
+      </div>
+      <div>
+        <vue-flip
+          v-model="flipped"
+          width="700px"
+          height="400px"
+          class="card-container"
+        >
+          <template v-slot:front>
+            <div v-if="!reverseWordOrder" class="card">
+              <div class="card-title">Original</div>
+              <div class="word">{{ fromWord }}</div>
+              <div class="card-bottom-div">
+                <font-awesome-icon
+                  @click="
+                    () => {
+                      flipped = !flipped
+                    }
+                  "
+                  class="flip-btn"
+                  icon="fa-solid fa-rotate"
+                />
+                <div class="word-count">
+                  {{ wordCount }} of {{ totalWords }}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </template>
-      <template v-slot:back>
-        <div v-if="!reverseWordOrder" class="card">
-          <div class="card-title">Translation</div>
-          <div :class="wordCorrect ? 'word' : 'word red-font'">
-            {{ toWord }}
-          </div>
-          <div class="btn-div">
-            <font-awesome-icon
-              @click="
-                () => {
-                  flipped = !flipped
-                }
-              "
-              class="flip-btn"
-              icon="fa-solid fa-rotate"
-            />
-            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
-            <div class="btn-wrapper">
-              <button id="mark-btn" @click="() => (wordCorrect = !wordCorrect)">
-                {{ correctAction }}
-              </button>
+            <div v-else class="card">
+              <div class="card-title">Translation</div>
+              <div :class="wordCorrect ? 'word' : 'word red-font'">
+                {{ toWord }}
+              </div>
+              <div class="card-bottom-div">
+                <font-awesome-icon
+                  @click="
+                    () => {
+                      flipped = !flipped
+                    }
+                  "
+                  class="flip-btn"
+                  icon="fa-solid fa-rotate"
+                />
+                <div class="word-count">
+                  {{ wordCount }} of {{ totalWords }}
+                </div>
+                <div class="btn-wrapper">
+                  <button
+                    id="mark-btn"
+                    @click="() => (wordCorrect = !wordCorrect)"
+                  >
+                    {{ correctAction }}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div v-else class="card">
-          <div class="card-title">Original</div>
-          <div class="word">{{ fromWord }}</div>
-          <div class="btn-div">
-            <font-awesome-icon
-              @click="
-                () => {
-                  flipped = !flipped
-                }
-              "
-              class="flip-btn"
-              icon="fa-solid fa-rotate"
-            />
-            <div class="word-count">{{ wordCount }} of {{ totalWords }}</div>
-          </div>
-        </div>
-      </template>
-    </vue-flip>
-    <div class="btn-div">
+          </template>
+          <template v-slot:back>
+            <div v-if="!reverseWordOrder" class="card">
+              <div class="card-title">Translation</div>
+              <div :class="wordCorrect ? 'word' : 'word red-font'">
+                {{ toWord }}
+              </div>
+              <div class="card-bottom-div">
+                <font-awesome-icon
+                  @click="
+                    () => {
+                      flipped = !flipped
+                    }
+                  "
+                  class="flip-btn"
+                  icon="fa-solid fa-rotate"
+                />
+                <div class="word-count">
+                  {{ wordCount }} of {{ totalWords }}
+                </div>
+                <div class="btn-wrapper">
+                  <button
+                    id="mark-btn"
+                    @click="() => (wordCorrect = !wordCorrect)"
+                  >
+                    {{ correctAction }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div v-else class="card">
+              <div class="card-title">Original</div>
+              <div class="word">{{ fromWord }}</div>
+              <div class="card-bottom-div">
+                <font-awesome-icon
+                  @click="
+                    () => {
+                      flipped = !flipped
+                    }
+                  "
+                  class="flip-btn"
+                  icon="fa-solid fa-rotate"
+                />
+                <div class="word-count">
+                  {{ wordCount }} of {{ totalWords }}
+                </div>
+              </div>
+            </div>
+          </template>
+        </vue-flip>
+      </div>
+    </div>
+    <div class="bottom-div">
       <div class="word-order-div">
         <span
           >Present Words in:
@@ -236,25 +304,55 @@ const correctAction = computed(() => {
             v-model="reverseWordOrder"
           />{{ toLang.name }}
         </span>
-        <button @click="nextWord">Next Word</button>
       </div>
+      <button @click="nextWord" class="btn">Next Word</button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  margin-left: 20%;
+  margin-top: 5%;
+  display: flex;
+  flex-direction: column;
+}
+
+.center-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 15px;
+}
+
+.card-container {
   width: 60%;
 }
 
-.btn-div {
+.card-bottom-div {
+  margin-left: 20%;
+  width: 60%;
   margin-top: 0px;
   padding-left: 20px;
   padding-right: 20px;
   display: grid;
   align-items: center;
   grid-template-columns: 33% 33% 33%;
+}
+
+.bottom-div {
+  margin-left: 5%;
+  width: 100%;
+  margin-top: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.btn {
+  margin-left: 20px;
 }
 
 .btn-wrapper {
@@ -271,9 +369,25 @@ const correctAction = computed(() => {
   border-style: solid;
   border-width: 2px;
   height: 90%;
-  margin-left: 10%;
-  width: 80%;
   background-color: rgb(250, 250, 250);
+}
+
+.block {
+  width: 25%;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.row {
+  margin-top: 15px;
+}
+
+.right-label {
+  margin-left: 5px;
+}
+
+.left-label {
+  margin-right: 5px;
 }
 
 .word-count {
@@ -298,11 +412,8 @@ const correctAction = computed(() => {
   margin-bottom: 20px;
 }
 
-button {
-  margin-right: 5px;
-  margin-left: 10px;
-  padding: 5px;
-  background-color: white;
+.button {
+  border-radius: 3px;
 }
 
 .flip-btn {
@@ -318,5 +429,17 @@ button {
 
 .red-font {
   color: red;
+}
+
+#minAge {
+  width: 37px;
+}
+
+#minCorrect {
+  width: 30px;
+}
+
+legend {
+  font-weight: 800;
 }
 </style>
