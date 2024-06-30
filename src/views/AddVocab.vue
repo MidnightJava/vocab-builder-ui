@@ -48,7 +48,7 @@
               msg = ''
             }
           "
-          :disabled="!toWord.length"
+          :disabled="!toWord?.length"
         >
           Clear
         </button>
@@ -127,17 +127,17 @@ const lookup = async () => {
   let word = null
   let [frl, tol] = [null, null]
   let targetRef = null
-  if ((fromWord.value.length > 0) & (toWord.value.length == 0)) {
-    if (fromWord.value.includes(',')) {
+  if ((fromWord.value.length > 0) & (toWord?.value?.length == 0)) {
+    if (fromWord?.value?.includes(',')) {
       msg.value = 'Multiple words are for manual entry only'
       return
     } else {
       msg.value = ''
     }
-    ;[frl, tol] = [fromLang.value.id, toLang.value.id]
-    word = fromWord.value
+    ;[frl, tol] = [fromLang?.value?.id, toLang?.value?.id]
+    word = fromWord?.value
     targetRef = toWord
-  } else if ((toWord.value.length > 0) & (fromWord.value.length == 0)) {
+  } else if ((toWord?.value?.length > 0) & (fromWord?.value?.length == 0)) {
     if (toWord.value.includes(',')) {
       msg.value = 'Use separate entries to specify multiple tranlations'
       return
@@ -171,13 +171,13 @@ const toLangHint = computed(() => {
 
 const lookupDisabled = computed(() => {
   return (
-    (fromWord.value.length > 0 && toWord.value.length > 0) ||
-    (fromWord.value.length === 0 && toWord.value.length == 0)
+    (fromWord?.value?.length > 0 && toWord?.value?.length > 0) ||
+    (fromWord?.value?.length === 0 && toWord?.value?.length == 0)
   )
 })
 
 const submitDisabled = computed(() => {
-  return fromWord.value.length === 0 || toWord.value.length === 0
+  return !fromWord?.value?.length || !toWord?.value?.length
 })
 
 const title = computed(() => {

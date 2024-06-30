@@ -14,7 +14,7 @@ const useFetch = async (url, method = 'GET', payload = null) => {
     return res.statusText
   }
   const json = await res.json()
-  if ('Error' in json) {
+  if (!json || 'Error' in json) {
     connected.value = false
   } else {
     connected.value = true
