@@ -20,6 +20,7 @@ const connected = ref(false)
 const lookup = ref(false)
 const minCorrect = ref(5)
 const minAge = ref(15)
+const apiLookup = ref(true)
 
 provide('langs', langs)
 provide('vocab', vocab)
@@ -29,6 +30,7 @@ provide('connected', connected)
 provide('lookup', lookup)
 provide('minCorrect', minCorrect)
 provide('minAge', minAge)
+provide('apiLookup', apiLookup)
 
 const compMap = {
   'Available Languages': AvailableLanguagesView,
@@ -41,7 +43,7 @@ const tabs = Object.keys(compMap)
 
 const init = async (fromLang, toLang) => {
   await useFetch.value.fetch(
-    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}`,
+    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&api_lookup=${apiLookup.value}`,
     'GET'
   )
   let res = await useFetch.value.fetch(

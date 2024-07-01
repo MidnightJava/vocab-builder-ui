@@ -54,7 +54,7 @@
         </button>
       </div>
       <div id="buttonDiv">
-        <button :disabled="lookupDisabled" @click="lookup">
+        <button v-if="apiLookup" :disabled="lookupDisabled" @click="lookup">
           Lookup Translation
         </button>
         <button :disabled="submitDisabled" @click="postEntry()">Submit</button>
@@ -90,6 +90,8 @@ const transResult = ref(null)
 const vocab = inject('vocab')
 
 let show = inject('show')
+
+const apiLookup = inject('apiLookup')
 
 const showModal = () => {
   role.value = 'add'
