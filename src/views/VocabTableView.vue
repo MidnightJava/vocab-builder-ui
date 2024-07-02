@@ -347,6 +347,7 @@ const fileSelected = e => {
           action="http://localhost:5000/vocab/import_csv"
           method="post"
           enctype="multipart/form-data"
+          target="result_tab"
           class="col"
         >
           <input
