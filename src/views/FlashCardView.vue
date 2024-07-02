@@ -20,7 +20,7 @@ const reverseWordOrder = ref(false)
 const wordCorrect = ref(true)
 
 const wordCount = ref(0)
-const totalWords = ref(0)
+const totalWords = inject('totalWords')
 
 const minCorrect = inject('minCorrect')
 const minAge = inject('minAge')
@@ -52,11 +52,6 @@ const changesPending = computed(() => {
  * BugFix: preseve started state when switching tabs
  */
 
-const selectWords = async () => {
-  await useFetch.value.fetch('http://localhost:5000/vocab/select_words', 'GET')
-}
-
-defineExpose({ selectWords })
 const nextWord = async () => {
   if (wordCorrect.value) markCorrect()
 
@@ -70,17 +65,13 @@ const nextWord = async () => {
     )
     if ('Error' in res) {
       console.log(`Error calling next_word: ${res.Error}`)
-      // connected.value = false
       throw Error()
     } else {
       fromWord.value = res.text
       wordCount.value = res.count
-      totalWords.value = res.size
       translate()
-      // connected.value = true
     }
   } catch (err) {
-    // connected.value = false
     console.log(`Fetch call failed`)
   }
 }
@@ -133,13 +124,14 @@ const setWordOrder = async () => {
       value: wordOrder,
     }
   )
-  nextWord()
+  const temp = toWord.value
+  toWord.value = fromWord.value
+  fromWord.value = temp
 }
 
 watch(reverseWordOrder, setWordOrder)
 
 onMounted(() => {
-  selectWords()
   nextWord()
 })
 

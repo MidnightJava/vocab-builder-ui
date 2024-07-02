@@ -22,7 +22,7 @@ library.add(faEllipsisVertical)
 library.add(faEllipsis)
 library.add(faRotate)
 
-const app = createApp(App, { port: 8000 })
+const app = createApp(App)
 
 app.component('font-awesome-icon', FontAwesomeIcon)
 

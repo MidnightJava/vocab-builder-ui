@@ -9,8 +9,6 @@ import AvailableLanguagesView from './views/AvailableLanguagesView.vue'
 let currentTab = ref('Available Languages')
 
 const useFetch = ref(null)
-const flashCardView = ref(null)
-
 const langs = ref({})
 const defLangs = ref({})
 const vocab = ref(null)
@@ -21,6 +19,7 @@ const lookup = ref(false)
 const minCorrect = ref(5)
 const minAge = ref(15)
 const apiLookup = ref(true)
+const totalWords = ref(0)
 
 provide('langs', langs)
 provide('vocab', vocab)
@@ -31,6 +30,7 @@ provide('lookup', lookup)
 provide('minCorrect', minCorrect)
 provide('minAge', minAge)
 provide('apiLookup', apiLookup)
+provide('totalWords', totalWords)
 
 const compMap = {
   'Available Languages': AvailableLanguagesView,
@@ -40,6 +40,14 @@ const compMap = {
 }
 
 const tabs = Object.keys(compMap)
+
+const selectWords = async () => {
+  const res = await useFetch.value.fetch(
+    'http://localhost:5000/vocab/select_words',
+    'GET'
+  )
+  totalWords.value = Number(res.Result)
+}
 
 const init = async (fromLang, toLang) => {
   await useFetch.value.fetch(
@@ -62,9 +70,8 @@ const init = async (fromLang, toLang) => {
     res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all')
     vocab.value = res
   }
-  flashCardView.value.selectWords()
+  selectWords()
   currentTab.value = 'Available Languages'
-  // connected.value = true
 }
 
 const currentTabComponent = computed(() => {
@@ -119,7 +126,6 @@ watch(defLangs, newVal => {
 watch(connected, newVal => {
   if (newVal == false) {
     console.log('Disconnected')
-    // init(fromLang, toLang)
   }
 })
 
@@ -132,22 +138,19 @@ onMounted(() => {
 
 <template>
   <UseFetch ref="useFetch" />
-  <div v-show="false">
-    <FlashCardView ref="flashCardView" />
-  </div>
   <div id="top-level-app">
     <div class="top-nav">
       <button
         v-for="tab in tabs"
         v-bind:key="tab"
         v-bind:class="['tab-button', { active: currentTab === tab }]"
-        v-on:click="currentTab = tab"
+        @click="() => (currentTab = tab)"
       >
         {{ tab }}
       </button>
     </div>
     <KeepAlive>
-      <component v-bind:is="currentTabComponent" class="tab"></component>
+      <component v-bind:is="currentTabComponent"></component>
     </KeepAlive>
     <div class="reconnect-panel" v-if="!connected">
       <div class="reconnect-label">Lost server connection</div>
