@@ -1,10 +1,43 @@
 <script setup>
-import { inject, computed, ref, provide } from 'vue'
+import { inject, computed, ref, provide, onMounted, watch } from 'vue'
 import { usePagination } from 'use-vue3-easy-data-table'
 
 import UseFetch from '../components/UseFetch.vue'
 import VocabTable from 'vue3-easy-data-table'
 import AddVocab from './AddVocab.vue'
+
+const apiKey = ref('Not Set')
+const _apiKey = ref('Not Set')
+const invalidKey = ref(false)
+const filesSelected = ref(0)
+
+const apiLookup = inject('apiLookup')
+
+const setApiKey = async () => {
+  const res = await useFetch.value.fetch(
+    'http://localhost:5000/api_key/set',
+    'POST',
+    { api_key: _apiKey.value }
+  )
+  if (res.result !== _apiKey.value) {
+    invalidKey.value = true
+  } else {
+    invalidKey.value = false
+    apiKey.value = _apiKey.value
+  }
+}
+
+const apiKeyChangePending = computed(() => {
+  return apiKey.value !== _apiKey.value || invalidKey.value === true
+})
+
+const updateDisabled = computed(
+  () => !apiKeyChangePending.value || !apiLookup.value
+)
+
+const apiLabelClass = computed(() => {
+  return !apiLookup?.value ? 'disabled' : ''
+})
 
 const useFetch = ref(null)
 
@@ -127,6 +160,29 @@ const editEntry = item => {
   fromWord.value = item[fromLang.value.name.toLowerCase()].join(',')
   show.value = true
 }
+
+onMounted(async () => {
+  let res = await useFetch.value.fetch('http://localhost:5000/api_key', 'GET')
+  if (!res) {
+    invalidKey.value = true
+  } else {
+    _apiKey.value = apiKey.value = res?.result
+    try {
+      res = await useFetch.value.fetch(
+        'http://localhost:5000/vocab/translate?from_lang=en&to_lang=it&word=test',
+        'GET'
+      )
+      if (!res?.result) invalidKey.value = true
+    } catch (e) {
+      console.log(e.message)
+    }
+  }
+})
+
+const fileSelected = e => {
+  console.log('File selection changed')
+  filesSelected.value = e.target.files.length
+}
 </script>
 
 <template>
@@ -236,6 +292,7 @@ const editEntry = item => {
           Clear
         </button>
       </div>
+      <AddVocab></AddVocab>
       <div>
         <button
           id="deleteSelected"
@@ -244,7 +301,63 @@ const editEntry = item => {
         >
           Delete Selected Entries
         </button>
-        <AddVocab></AddVocab>
+        <fieldset class="block">
+          <legend>Add Vocab Entry Settings</legend>
+          <div class="row">
+            <label>Translation Source</label>
+            <input
+              type="radio"
+              id="autoLookup"
+              :value="true"
+              v-model="apiLookup"
+            />
+            <label for="autoLokkup">API Call</label>
+            <input
+              type="radio"
+              id="manualLookup"
+              :value="false"
+              v-model="apiLookup"
+            />
+            <label for="manualLookup">Manual Entry</label>
+          </div>
+
+          <div class="row">
+            <label for="apiKey" :class="apiLabelClass" :disabled="!apiLookup"
+              >API Key</label
+            >
+            <input
+              type="text"
+              id="apiKey"
+              v-model="_apiKey"
+              :disabled="!apiLookup"
+            />
+            <button
+              class="button"
+              @click="setApiKey"
+              :disabled="updateDisabled"
+            >
+              Update
+            </button>
+            <label class="warning" v-if="invalidKey"
+              >The API Key is invalid</label
+            >
+          </div>
+        </fieldset>
+        <form
+          action="http://localhost:5000/vocab/import_csv"
+          method="post"
+          enctype="multipart/form-data"
+          class="col"
+        >
+          <input
+            type="file"
+            id="fileImport"
+            accept=".csv"
+            name="file"
+            @change="fileSelected"
+          />
+          <input v-show="filesSelected > 0" type="submit" value="Upload" />
+        </form>
       </div>
     </div>
   </div>
@@ -254,6 +367,13 @@ const editEntry = item => {
 header {
   line-height: 1.5;
   max-height: 100vh;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  align-items: flex-start;
+  padding-top: 10px;
 }
 
 .float-container {
@@ -283,7 +403,8 @@ header {
   }
 
   #deleteSelected {
-    margin-top: 20px;
+    margin-top: 10px;
+    margin-left: 0;
   }
   .del-button {
     margin-left: 5px;
@@ -303,6 +424,12 @@ header {
 
   button {
     margin-left: 5px;
+  }
+
+  .block {
+    margin-top: 40px;
+    width: 80%;
+    padding: 5px;
   }
 
   .customize-footer {
@@ -330,6 +457,47 @@ header {
     background: yellow;
     display: flex;
     justify-content: space-between;
+  }
+
+  label {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .warning {
+    color: red;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  input {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  input[type='submit'] {
+    margin-top: 5px;
+    margin-left: 0;
+  }
+
+  .disabled {
+    color: gray;
+  }
+
+  input[type='text'] + label {
+    float: left;
+  }
+
+  #fileImport {
+    margin-top: 5px;
+    margin-left: 0;
   }
 }
 </style>

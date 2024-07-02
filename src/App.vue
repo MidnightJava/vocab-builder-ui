@@ -51,7 +51,7 @@ const selectWords = async () => {
 
 const init = async (fromLang, toLang) => {
   await useFetch.value.fetch(
-    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&api_lookup=${apiLookup.value}`,
+    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}`,
     'GET'
   )
   let res = await useFetch.value.fetch(
@@ -127,6 +127,12 @@ watch(connected, newVal => {
   if (newVal == false) {
     console.log('Disconnected')
   }
+})
+
+watch(apiLookup, async newVal => {
+  await useFetch.value.fetch('http://localhost:5000/apilookup/set', 'POST', {
+    api_lookup: newVal,
+  })
 })
 
 onMounted(() => {
