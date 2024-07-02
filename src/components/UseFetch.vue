@@ -25,3 +25,4 @@ const useFetch = async (url, method = 'GET', payload = null) => {
 
 defineExpose({ fetch: useFetch })
 </script>
+<template><div></div></template>
