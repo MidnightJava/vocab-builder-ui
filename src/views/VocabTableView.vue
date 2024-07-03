@@ -9,7 +9,10 @@ import AddVocab from './AddVocab.vue'
 const apiKey = ref('Not Set')
 const _apiKey = ref('Not Set')
 const invalidKey = ref(false)
-const filesSelected = ref(0)
+const csvImportSelected = ref(0)
+const csvExportSelected = ref(0)
+const jsonImportSelected = ref(0)
+const jsonExportSelected = ref(0)
 
 const apiLookup = inject('apiLookup')
 
@@ -179,9 +182,41 @@ onMounted(async () => {
   }
 })
 
-const fileSelected = e => {
-  console.log('File selection changed')
-  filesSelected.value = e.target.files.length
+const csvImportFileSelect = e => {
+  csvImportSelected.value = e.target.files.length
+}
+
+const jsonImportFileSelect = e => {
+  jsonImportSelected.value = e.target.files.length
+}
+
+const downloadFile = (data, type) => {
+  // Replace all '\n' characters with '\r\n' to ensure correct line breaks in CSV
+  const csvData = type === 'csv' ? data.replace(/\n/g, '\r\n') : data
+  const blob = new Blob([csvData], { type: `text/${type}` })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'download.csv'
+  a.click()
+}
+
+const exportCsvFile = async () => {
+  const res = await useFetch.value.fetch(
+    'http://localhost:5000/vocab/export_csv',
+    'GET'
+  )
+  const data = res.file
+  downloadFile(data, 'csv')
+}
+
+const exportJsonFile = async () => {
+  const res = await useFetch.value.fetch(
+    'http://localhost:5000/vocab/export_json',
+    'GET'
+  )
+  const data = res.file
+  downloadFile(data, 'json')
 }
 </script>
 
@@ -343,22 +378,73 @@ const fileSelected = e => {
             >
           </div>
         </fieldset>
-        <form
-          action="http://localhost:5000/vocab/import_csv"
-          method="post"
-          enctype="multipart/form-data"
-          target="result_tab"
-          class="col"
-        >
-          <input
-            type="file"
-            id="fileImport"
-            accept=".csv"
-            name="file"
-            @change="fileSelected"
-          />
-          <input v-show="filesSelected > 0" type="submit" value="Upload" />
-        </form>
+        <fieldset class="block">
+          <legend>Vocabulary as CSV File (word and translation only)</legend>
+          <div class="row">
+            <label for="csvImport">Import</label>
+            <form
+              action="http://localhost:5000/vocab/import_csv"
+              method="post"
+              enctype="multipart/form-data"
+              target="result_tab"
+            >
+              <input
+                type="file"
+                id="csvImport"
+                accept=".csv"
+                name="file"
+                @change="csvImportFileSelect"
+              />
+              <input
+                v-show="csvImportSelected > 0"
+                type="submit"
+                value="Upload"
+              />
+            </form>
+          </div>
+          <div class="row">
+            <label for="csvExport">Export</label>
+            <button id="csvExport" @click="exportCsvFile">Download</button>
+          </div>
+          <div class="import-label">
+            Words from the csv file are added to the existing vocabulary
+          </div>
+        </fieldset>
+        <fieldset class="block">
+          <legend>
+            Vocabulary as JSON File (includes test history and metadata)
+          </legend>
+          <div class="row">
+            <label for="jsonImport">Import</label>
+            <form
+              action="http://localhost:5000/vocab/import_json"
+              method="post"
+              enctype="multipart/form-data"
+              target="result_tab"
+            >
+              <input
+                type="file"
+                id="jsonImport"
+                accept=".json"
+                name="file"
+                @change="jsonImportFileSelect"
+              />
+              <input
+                v-show="jsonImportSelected > 0"
+                type="submit"
+                value="Upload"
+              />
+            </form>
+          </div>
+          <div class="row">
+            <label for="jsonExport">Export</label>
+            <button id="jsonExport" @click="exportJsonFile">Download</button>
+          </div>
+          <div class="import-label">
+            The file you import will replace the existing vocabulary. Be sure to
+            export a backup and save it before importing a new one.
+          </div>
+        </fieldset>
       </div>
     </div>
   </div>
@@ -465,6 +551,11 @@ header {
     margin-bottom: auto;
   }
 
+  .import-label {
+    margin-top: 10px;
+    color: blue;
+  }
+
   .warning {
     color: red;
   }
@@ -473,7 +564,9 @@ header {
     display: flex;
     flex-direction: row;
     margin-top: 10px;
+    gap: 10px;
     align-items: center;
+    justify-content: flex-start;
   }
 
   input {
@@ -496,7 +589,12 @@ header {
     float: left;
   }
 
-  #fileImport {
+  #csvImport {
+    margin-top: 5px;
+    margin-left: 0;
+  }
+
+  #csvExport {
     margin-top: 5px;
     margin-left: 0;
   }

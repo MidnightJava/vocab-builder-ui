@@ -36,7 +36,6 @@ const compMap = {
   'Available Languages': AvailableLanguagesView,
   'Saved Vocabulary': VocabTableView,
   'Flash Cards': FlashCardView,
-  Settings: SettingsView,
 }
 
 const tabs = Object.keys(compMap)
