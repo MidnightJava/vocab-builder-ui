@@ -10,11 +10,11 @@ const apiKey = ref('Not Set')
 const _apiKey = ref('Not Set')
 const invalidKey = ref(false)
 const csvImportSelected = ref(0)
-const csvExportSelected = ref(0)
 const jsonImportSelected = ref(0)
-const jsonExportSelected = ref(0)
 
 const apiLookup = inject('apiLookup')
+const toLang = inject('toLang')
+const fromLang = inject('fromLang')
 
 const setApiKey = async () => {
   const res = await useFetch.value.fetch(
@@ -73,8 +73,6 @@ const {
   updatePage,
 } = usePagination(dataTable)
 
-const fromLang = inject('fromLang')
-const toLang = inject('toLang')
 const vocab = inject('vocab')
 
 const headers = [
@@ -197,7 +195,7 @@ const downloadFile = (data, type) => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'download.csv'
+  a.download = `${toLang.value.id}_${fromLang.value.id}_vocab.${type}`
   a.click()
 }
 

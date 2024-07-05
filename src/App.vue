@@ -3,7 +3,6 @@ import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue'
 import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
-import SettingsView from './views/SettingsView.vue'
 import AvailableLanguagesView from './views/AvailableLanguagesView.vue'
 
 let currentTab = ref('Available Languages')
