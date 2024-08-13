@@ -313,7 +313,11 @@ const exportJsonFile = async () => {
       </div>
     </div>
     <div class="float-child">
-      <input type="text" placeholder="Search" v-model="searchValue" />
+      <input
+        type="text"
+        placeholder="Search Vocabulary"
+        v-model="searchValue"
+      />
       <div>
         <input
           type="checkbox"

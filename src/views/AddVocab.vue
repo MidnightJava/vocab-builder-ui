@@ -1,6 +1,6 @@
 <template>
   <UseFetch ref="useFetch" />
-  <button @click="showModal">Add Entry</button>
+  <button @click="showModal">Add Word</button>
   <!-- If the option changed modal component the name
     <MyModal>
     -->

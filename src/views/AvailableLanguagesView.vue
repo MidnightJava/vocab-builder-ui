@@ -148,13 +148,15 @@ watch(
         />
         <label class="lang-id-label">ID: {{ toLang.id }}</label>
       </div>
-      <button
-        class="default-btn"
-        :disabled="!toLang.id.length || !fromLang.id.length"
-        @click="setDefaultLangs"
-      >
-        Set as Defaults
-      </button>
+      <div class="grid-3-col">
+        <button
+          class="default-btn"
+          :disabled="!toLang.id.length || !fromLang.id.length"
+          @click="setDefaultLangs"
+        >
+          Set as Defaults
+        </button>
+      </div>
       <div id="parts-table">
         <PartsTable></PartsTable>
       </div>

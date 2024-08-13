@@ -20,11 +20,12 @@ const showAddItem = ref(false)
 const newEntryInp = ref('')
 const dupEntry = ref(false)
 const getPartsFunc = inject('getPartsFunc')
+const newEntryInpElem = ref('')
 
 watch(
   () => parts.value,
   newv => {
-    data.value = newv
+    data.value = newv.slice()
   }
 )
 
@@ -79,6 +80,7 @@ const changesPending = computed(() => {
 
 const addItem = () => {
   showAddItem.value = true
+  setTimeout(() => newEntryInpElem.value.focus())
 }
 
 const doAddItem = () => {
@@ -136,6 +138,7 @@ const cancelAddItem = () => {
             id="new-entry-inp"
             :class="entryClass"
             type="text"
+            ref="newEntryInpElem"
           />
           <button id="add-ok-cancel" :disabled="dupEntry" @click="doAddItem">
             OK
