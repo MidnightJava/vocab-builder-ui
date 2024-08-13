@@ -17,6 +17,8 @@ const connected = ref(false)
 const lookup = ref(false)
 const minCorrect = ref(5)
 const minAge = ref(15)
+const partOfSpeech = ref('any')
+const partsOfSpeech = ref([])
 const apiLookup = ref(true)
 const totalWords = ref(0)
 
@@ -28,6 +30,8 @@ provide('connected', connected)
 provide('lookup', lookup)
 provide('minCorrect', minCorrect)
 provide('minAge', minAge)
+provide('partOfSpeech', partOfSpeech)
+provide('partsOfSpeech', partsOfSpeech)
 provide('apiLookup', apiLookup)
 provide('totalWords', totalWords)
 
@@ -49,7 +53,7 @@ const selectWords = async () => {
 
 const init = async (fromLang, toLang) => {
   await useFetch.value.fetch(
-    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}`,
+    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part=${partOfSpeech.value}`,
     'GET'
   )
   let res = await useFetch.value.fetch(
@@ -69,8 +73,20 @@ const init = async (fromLang, toLang) => {
     vocab.value = res
   }
   selectWords()
+
+  getPartsOfSpeech()
   currentTab.value = 'Available Languages'
 }
+
+const getPartsOfSpeech = async () => {
+  const res = await useFetch.value.fetch(
+    'http://localhost:5000/partsofspeech/get',
+    'GET'
+  )
+  partsOfSpeech.value = res
+}
+
+provide('getPartsFunc', getPartsOfSpeech)
 
 const currentTabComponent = computed(() => {
   return compMap[currentTab.value]

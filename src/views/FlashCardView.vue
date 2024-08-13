@@ -24,17 +24,23 @@ const totalWords = inject('totalWords')
 
 const minCorrect = inject('minCorrect')
 const minAge = inject('minAge')
+const part = inject('partOfSpeech')
 let _minCorrect = ref(5)
 let _minAge = ref(15)
+let _part = ref('any')
 
 const applyChanges = () => {
   minCorrect.value = _minCorrect.value
   minAge.value = _minAge.value
+  part.value = _part.value
 }
 
 const changesPending = computed(() => {
+  console.log(`part: ${_part.value}`)
   return (
-    minCorrect.value !== _minCorrect.value || minAge.value !== _minAge.value
+    minCorrect.value !== _minCorrect.value ||
+    minAge.value !== _minAge.value ||
+    part.value !== _part.value
   )
 })
 
@@ -162,6 +168,16 @@ const correctAction = computed(() => {
           <label class="left-label" for="minAge">Last correct at least</label>
           <input type="number" id="minAge" value="15" v-model="_minAge" />
           <label class="right-label" for="minAge">days ago</label>
+        </div>
+        <div class="row">
+          <label class="left-label" for="part">Part of Speech</label>
+          <select id="part" v-model="_part">
+            <option value="any">Any</option>
+            <option value="verb">Verb</option>
+            <option value="noun">Noun</option>
+            <option value="adjective">Adjective</option>
+            <option value="adverb">Adverb</option>
+          </select>
         </div>
         <div class="row">
           <button

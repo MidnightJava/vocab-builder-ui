@@ -1,5 +1,5 @@
 <script setup>
-import { inject, computed, ref, provide, onMounted, watch } from 'vue'
+import { inject, computed, ref, provide, onMounted } from 'vue'
 import { usePagination } from 'use-vue3-easy-data-table'
 
 import UseFetch from '../components/UseFetch.vue'
@@ -85,7 +85,13 @@ const headers = [
   {
     text: toLang.value.name,
     value: toLang.value.name?.toLowerCase(),
-    width: 200,
+    width: 170,
+    sortable: true,
+  },
+  {
+    text: 'Grammar Part',
+    value: 'Grammar Part',
+    width: 100,
     sortable: true,
   },
   { text: 'Add/Update', value: 'opts', width: 165, sortable: false },
@@ -100,6 +106,7 @@ const getItems = computed(() => {
         id: count++,
         [toLang.value?.name?.toLowerCase()]: entry[0],
         [fromLang.value?.name?.toLowerCase()]: entry[1].translations,
+        'Grammar Part': entry[1].part,
         opts: false,
       }
     })
@@ -108,6 +115,7 @@ const getItems = computed(() => {
         id: 0,
         [toLang.value?.name?.toLowerCase()]: '',
         [fromLang.value?.name?.toLowerCase()]: [],
+        'Grammar Part': '',
         opts: false,
       })
     }
@@ -236,8 +244,8 @@ const exportJsonFile = async () => {
       >
         <template #item-opts="item">
           <div
-            @mouseout="() => (showOpt = 0)"
-            @mouseover="() => (showOpt = item.id)"
+            @mouseleave="() => (showOpt = 0)"
+            @mouseenter="() => (showOpt = item.id)"
           >
             <span v-if="showOpt === item.id && item.id !== 0">
               <button class="del-button" @click="() => editEntry(item)">
@@ -469,7 +477,7 @@ header {
 }
 
 .float-child {
-  width: 630px;
+  width: 700px;
   float: left;
   padding: 20px;
 }

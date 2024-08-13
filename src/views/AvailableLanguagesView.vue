@@ -1,6 +1,7 @@
 <script setup>
 import { inject, computed, ref, watch } from 'vue'
 import LangsTable from 'vue3-easy-data-table'
+import PartsTable from './PartsOfSpeechView.vue'
 import { usePagination } from 'use-vue3-easy-data-table'
 import UseFetch from '../components/UseFetch.vue'
 
@@ -154,6 +155,9 @@ watch(
       >
         Set as Defaults
       </button>
+      <div id="parts-table">
+        <PartsTable></PartsTable>
+      </div>
     </div>
     <div class="float-child">
       <LangsTable
@@ -169,12 +173,12 @@ watch(
       >
         <template #item-select="item">
           <div
-            @mouseout="
+            @mouseleave="
               () => {
                 showOpt = 0
               }
             "
-            @mouseover="
+            @mouseenter="
               () => {
                 showOpt = item.count
               }
@@ -257,6 +261,11 @@ watch(
   width: 640px;
   float: left;
   padding: 20px;
+}
+
+#parts-table {
+  margin-top: 20px;
+  float: left;
 }
 
 #deleteSelected {
