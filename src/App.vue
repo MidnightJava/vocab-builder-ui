@@ -231,7 +231,7 @@ onMounted(() => {
   padding-top: 50px;
   padding-bottom: 50px;
   margin: auto;
-  width: 80%;
+  width: 90%;
 }
 
 .top-nav {

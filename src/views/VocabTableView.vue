@@ -16,6 +16,8 @@ const apiLookup = inject('apiLookup')
 const toLang = inject('toLang')
 const fromLang = inject('fromLang')
 const partsOfSpeech = inject('partsOfSpeech')
+const part = ref('')
+const showSettings = ref(false)
 
 const setApiKey = async () => {
   const res = await useFetch.value.fetch(
@@ -61,6 +63,7 @@ let fromWord = ref('')
 provide('fromWord', fromWord)
 let toWord = ref('')
 provide('toWord', toWord)
+provide('part', part)
 
 const {
   currentPageFirstIndex,
@@ -168,6 +171,7 @@ const editEntry = item => {
   role.value = 'edit'
   toWord.value = item[toLang.value.name.toLowerCase()]
   fromWord.value = item[fromLang.value.name.toLowerCase()].join(',')
+  part.value = item.part
   show.value = true
 }
 
@@ -244,6 +248,10 @@ const selectPart = async (to, from, part) => {
 
   res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all', 'GET')
   vocab.value = res
+}
+
+const toggleShowSettings = () => {
+  showSettings.value = !showSettings.value
 }
 </script>
 
@@ -390,8 +398,18 @@ const selectPart = async (to, from, part) => {
         >
           Delete Selected Entries
         </button>
-        <fieldset class="block">
-          <legend>Add Vocab Entry Settings</legend>
+
+        <div>
+          <button @click="toggleShowSettings" class="show-settings-btn">
+            {{
+              `${
+                showSettings ? 'Hide' : 'Show'
+              } Settings and Import/Export Controls`
+            }}
+          </button>
+        </div>
+        <fieldset class="top-block" v-if="showSettings">
+          <legend>"Add Vocab Entry" Settings</legend>
           <div class="row">
             <label>Translation Source</label>
             <input
@@ -432,7 +450,7 @@ const selectPart = async (to, from, part) => {
             >
           </div>
         </fieldset>
-        <fieldset class="block">
+        <fieldset class="block" v-if="showSettings">
           <legend>Vocabulary as CSV File (word and translation only)</legend>
           <div class="row">
             <label for="csvImport">Import</label>
@@ -461,10 +479,11 @@ const selectPart = async (to, from, part) => {
             <button id="csvExport" @click="exportCsvFile">Download</button>
           </div>
           <div class="import-label">
-            Words from the csv file are added to the existing vocabulary
+            Words imported from the csv file are added to the existing
+            vocabulary
           </div>
         </fieldset>
-        <fieldset class="block">
+        <fieldset class="block" v-if="showSettings">
           <legend>
             Vocabulary as JSON File (includes test history and metadata)
           </legend>
@@ -495,8 +514,8 @@ const selectPart = async (to, from, part) => {
             <button id="jsonExport" @click="exportJsonFile">Download</button>
           </div>
           <div class="import-label">
-            The file you import will replace the existing vocabulary. Be sure to
-            export a backup and save it before importing a new one.
+            The JSON file you import will replace the existing vocabulary. Be
+            sure to export a backup and save it before importing a new one.
           </div>
         </fieldset>
       </div>
@@ -569,6 +588,12 @@ header {
 
   .block {
     margin-top: 40px;
+    width: 80%;
+    padding: 5px;
+  }
+
+  .top-block {
+    margin-top: 20px;
     width: 80%;
     padding: 5px;
   }
@@ -651,6 +676,10 @@ header {
   #csvExport {
     margin-top: 5px;
     margin-left: 0;
+  }
+
+  .show-settings-btn {
+    margin-top: 20px;
   }
 }
 </style>

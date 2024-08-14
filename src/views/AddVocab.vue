@@ -28,7 +28,7 @@ let show = inject('show')
 const apiLookup = inject('apiLookup')
 
 const partsOfSpeech = inject('partsOfSpeech')
-const part = ref(null)
+const part = inject('part')
 
 const showModal = () => {
   role.value = 'add'

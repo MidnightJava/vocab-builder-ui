@@ -15,6 +15,7 @@ const currentPageNumber = ref(1)
 
 const fromLang = inject('fromLang')
 const toLang = inject('toLang')
+const showPartsTable = ref(false)
 
 const {
   currentPageFirstIndex,
@@ -85,6 +86,10 @@ const searchValue = ref('')
 const searchField = ref(['name', 'id'])
 const showOpt = ref(0)
 
+const toggleShowParts = () => {
+  showPartsTable.value = !showPartsTable.value
+}
+
 watch(
   () => toLang.value.name,
   (newv, oldv) => {
@@ -108,57 +113,73 @@ watch(
   <UseFetch ref="useFetch" />
   <div class="float-container">
     <div class="float-child mx-2">
-      <input type="text" placeholder="Search" v-model="searchValue" />
+      <fieldset>
+        <legend>Select Languages from the Language Table</legend>
+        <input type="text" placeholder="Search" v-model="searchValue" />
+        <div>
+          <input type="checkbox" id="idCB" value="id" v-model="searchField" />
+          <label for="idCB">ID </label>
+          <input
+            type="checkbox"
+            id="nameCB"
+            value="name"
+            v-model="searchField"
+          />
+          <label for="nameCB">Name </label>
+          <input
+            type="checkbox"
+            id="nativeNameCB"
+            value="nativeName"
+            v-model="searchField"
+          />
+          <label for="nativeNameCB">Native Name</label>
+          <button :disabled="!searchValue.length" @click="searchValue = ''">
+            Clear
+          </button>
+        </div>
+        <div class="top-margin-5 grid-3-col">
+          <label>Original:</label>
+          <input
+            class="lang-inp left-margin-5"
+            type="text"
+            v-model.lazy="fromLang.name"
+            @change="e => setFromId(e.target.value)"
+            placeholder="Enter here or select from table"
+          />
+          <label class="lang-id-label">ID: {{ fromLang.id }}</label>
+        </div>
+        <div class="grid-3-col">
+          <label>Translated:</label>
+          <input
+            class="lang-inp left-margin-5"
+            type="text"
+            v-model.lazy="toLang.name"
+            @change="e => setToId(e.target.value)"
+            placeholder="Enter here or select from table"
+          />
+          <label class="lang-id-label">ID: {{ toLang.id }}</label>
+        </div>
+        <div>
+          <button
+            class="default-btn"
+            :disabled="!toLang.id.length || !fromLang.id.length"
+            @click="setDefaultLangs"
+          >
+            Set Selected Languages as Defaults
+          </button>
+        </div>
+      </fieldset>
       <div>
-        <input type="checkbox" id="idCB" value="id" v-model="searchField" />
-        <label for="idCB">ID </label>
-        <input type="checkbox" id="nameCB" value="name" v-model="searchField" />
-        <label for="nameCB">Name </label>
-        <input
-          type="checkbox"
-          id="nativeNameCB"
-          value="nativeName"
-          v-model="searchField"
-        />
-        <label for="nativeNameCB">Native Name</label>
-        <button :disabled="!searchValue.length" @click="searchValue = ''">
-          Clear
-        </button>
-      </div>
-      <div class="top-margin-10">Select the languages to use</div>
-      <div class="top-margin-5 grid-3-col">
-        <label>Original:</label>
-        <input
-          class="lang-inp left-margin-5"
-          type="text"
-          v-model.lazy="fromLang.name"
-          @change="e => setFromId(e.target.value)"
-          placeholder="Enter here or select from table"
-        />
-        <label class="lang-id-label">ID: {{ fromLang.id }}</label>
-      </div>
-      <div class="grid-3-col">
-        <label>Translated:</label>
-        <input
-          class="lang-inp left-margin-5"
-          type="text"
-          v-model.lazy="toLang.name"
-          @change="e => setToId(e.target.value)"
-          placeholder="Enter here or select from table"
-        />
-        <label class="lang-id-label">ID: {{ toLang.id }}</label>
-      </div>
-      <div class="grid-3-col">
         <button
-          class="default-btn"
+          class="show-parts-btn"
           :disabled="!toLang.id.length || !fromLang.id.length"
-          @click="setDefaultLangs"
+          @click="toggleShowParts"
         >
-          Set as Defaults
+          {{ `${showPartsTable ? 'Hide' : 'Show'} Parts of Speech` }}
         </button>
       </div>
       <div id="parts-table">
-        <PartsTable></PartsTable>
+        <PartsTable v-if="showPartsTable"></PartsTable>
       </div>
     </div>
     <div class="float-child">
@@ -266,7 +287,7 @@ watch(
 }
 
 #parts-table {
-  margin-top: 20px;
+  margin-top: 10px;
   float: left;
 }
 
@@ -303,6 +324,11 @@ button {
 
 .default-btn {
   margin-left: 0px;
+}
+
+.show-parts-btn {
+  margin-top: 30px;
+  margin-left: 0;
 }
 
 .hide {

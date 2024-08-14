@@ -97,6 +97,7 @@ const cancelAddItem = () => {
 
 <template>
   <UseFetch ref="useFetch" />
+  <label>Assign parts of speech to words for use as a flash card filter</label>
   <div class="float-container">
     <div class="float-child">
       <PartsTable
@@ -152,10 +153,10 @@ const cancelAddItem = () => {
 <style scoped>
 .float-container {
   border: 3px solid #fff;
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: flex-start;
   padding: 0;
 }
 
