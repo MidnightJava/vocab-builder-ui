@@ -1,69 +1,3 @@
-<template>
-  <UseFetch ref="useFetch" />
-  <button @click="showModal">Add Word</button>
-  <!-- If the option changed modal component the name
-    <MyModal>
-    -->
-  <Modal
-    v-model:visible="show"
-    :width="500"
-    :title="title"
-    :closable="false"
-    :cancelButton="{ text: 'Close', onclick: closeModal, loading: false }"
-    :draggable="true"
-    :mask="true"
-    :animation="true"
-  >
-    <div class="modal">
-      <div id="subtitle">Enter text for either language or both</div>
-      <div id="textDiv">
-        <input
-          id="fromLangInp"
-          :placeholder="fromLangHint"
-          type="text"
-          v-model="fromWord"
-          ref="fromWordEl"
-        />
-        <button
-          @click="
-            () => {
-              fromWord = ''
-              msg = ''
-            }
-          "
-          :disabled="!fromWord.length"
-        >
-          Clear
-        </button>
-        <input
-          id="toLangInp"
-          :placeholder="toLangHint"
-          type="text"
-          v-model="toWord"
-        />
-        <button
-          @click="
-            () => {
-              toWord = ''
-              msg = ''
-            }
-          "
-          :disabled="!toWord?.length"
-        >
-          Clear
-        </button>
-      </div>
-      <div id="buttonDiv">
-        <button v-if="apiLookup" :disabled="lookupDisabled" @click="lookup">
-          Lookup Translation
-        </button>
-        <button :disabled="submitDisabled" @click="postEntry()">Submit</button>
-      </div>
-      <div id="errMsg">{{ msg }}</div>
-    </div>
-  </Modal>
-</template>
-
 <script setup>
 import { ref, computed, inject, watch, nextTick } from 'vue'
 
@@ -93,6 +27,9 @@ let show = inject('show')
 
 const apiLookup = inject('apiLookup')
 
+const partsOfSpeech = inject('partsOfSpeech')
+const part = ref(null)
+
 const showModal = () => {
   role.value = 'add'
   fromWord.value = ''
@@ -116,6 +53,7 @@ const postEntry = async () => {
     {
       from: fromWord.value.replace(/,$/, ''),
       to: toWord.value,
+      part_of_speech: part.value,
     }
   )
   transResult.value = res
@@ -203,7 +141,91 @@ watch(fromWord, newVal => {
 const focusInput = () => {
   fromWordEl.value?.focus()
 }
+
+const options = computed(() => {
+  return partsOfSpeech.value
+})
 </script>
+<template>
+  <UseFetch ref="useFetch" />
+  <button @click="showModal">Add Word</button>
+  <!-- If the option changed modal component the name
+    <MyModal>
+    -->
+  <Modal
+    v-model:visible="show"
+    :width="500"
+    :title="title"
+    :closable="false"
+    :cancelButton="{ text: 'Close', onclick: closeModal, loading: false }"
+    :draggable="true"
+    :mask="true"
+    :animation="true"
+  >
+    <div class="modal">
+      <div id="subtitle">Enter text for either language or both</div>
+      <div id="textDiv">
+        <input
+          id="fromLangInp"
+          :placeholder="fromLangHint"
+          type="text"
+          v-model="fromWord"
+          ref="fromWordEl"
+        />
+        <button
+          @click="
+            () => {
+              fromWord = ''
+              msg = ''
+            }
+          "
+          :disabled="!fromWord.length"
+        >
+          Clear
+        </button>
+        <input
+          id="toLangInp"
+          :placeholder="toLangHint"
+          type="text"
+          v-model="toWord"
+        />
+        <button
+          @click="
+            () => {
+              toWord = ''
+              msg = ''
+            }
+          "
+          :disabled="!toWord?.length"
+        >
+          Clear
+        </button>
+        <div class="row">
+          <label for="part-select" id="part-label"
+            >Part of Speech (optional)</label
+          >
+          <select id="part-select" v-model="part">
+            <option
+              v-for="option in options"
+              :value="option"
+              totalWords
+              v-bind:key="option"
+            >
+              {{ option }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div id="buttonDiv">
+        <button v-if="apiLookup" :disabled="lookupDisabled" @click="lookup">
+          Lookup Translation
+        </button>
+        <button :disabled="submitDisabled" @click="postEntry()">Submit</button>
+      </div>
+      <div id="errMsg">{{ msg }}</div>
+    </div>
+  </Modal>
+</template>
 
 <style lang="scss">
 .modal {
@@ -225,6 +247,15 @@ input[type='text'] {
 button {
   margin-top: 5px;
   margin-right: 5px;
+}
+
+.row {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  gap: 10px;
+  padding-left: 17px;
 }
 
 #buttonDiv {
@@ -250,5 +281,9 @@ button {
   margin-top: 10px;
   height: 10px;
   font-size: 0.8rem;
+}
+
+#part-label {
+  font-size: 0.93rem;
 }
 </style>

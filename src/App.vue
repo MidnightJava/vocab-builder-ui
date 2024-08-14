@@ -17,7 +17,7 @@ const connected = ref(false)
 const lookup = ref(false)
 const minCorrect = ref(5)
 const minAge = ref(15)
-const partOfSpeech = ref('any')
+const partOfSpeech = ref('Any')
 const partsOfSpeech = ref([])
 const apiLookup = ref(true)
 const totalWords = ref(0)
@@ -53,7 +53,7 @@ const selectWords = async () => {
 
 const init = async (fromLang, toLang) => {
   await useFetch.value.fetch(
-    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part=${partOfSpeech.value}`,
+    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
     'GET'
   )
   let res = await useFetch.value.fetch(

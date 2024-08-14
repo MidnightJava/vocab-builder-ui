@@ -25,9 +25,10 @@ const totalWords = inject('totalWords')
 const minCorrect = inject('minCorrect')
 const minAge = inject('minAge')
 const part = inject('partOfSpeech')
+const partsOfSpeech = inject('partsOfSpeech')
 let _minCorrect = ref(5)
 let _minAge = ref(15)
-let _part = ref('any')
+let _part = ref(part.value)
 
 const applyChanges = () => {
   minCorrect.value = _minCorrect.value
@@ -44,6 +45,8 @@ const changesPending = computed(() => {
   )
 })
 
+const lastWordCount = ref(0)
+
 /**
  * TODO:
  * Handle either word order. DONE
@@ -59,6 +62,9 @@ const changesPending = computed(() => {
  */
 
 const nextWord = async () => {
+  if (lastWordCount.value >= totalWords.value) {
+    return
+  }
   if (wordCorrect.value) markCorrect()
 
   flipped.value = reverseWordOrder.value
@@ -75,6 +81,7 @@ const nextWord = async () => {
     } else {
       fromWord.value = res.text
       wordCount.value = res.count
+      lastWordCount.value = res.count
       translate()
     }
   } catch (err) {
@@ -137,8 +144,12 @@ const setWordOrder = async () => {
 
 watch(reverseWordOrder, setWordOrder)
 
-onMounted(() => {
-  nextWord()
+// onMounted(() => {
+//   nextWord()
+// })
+
+const options = computed(() => {
+  return partsOfSpeech.value
 })
 
 const correctAction = computed(() => {
@@ -172,11 +183,15 @@ const correctAction = computed(() => {
         <div class="row">
           <label class="left-label" for="part">Part of Speech</label>
           <select id="part" v-model="_part">
-            <option value="any">Any</option>
-            <option value="verb">Verb</option>
-            <option value="noun">Noun</option>
-            <option value="adjective">Adjective</option>
-            <option value="adverb">Adverb</option>
+            <option value="Any">Any</option>
+            <option
+              v-for="option in options"
+              :value="option"
+              totalWords
+              v-bind:key="option"
+            >
+              {{ option }}
+            </option>
           </select>
         </div>
         <div class="row">
