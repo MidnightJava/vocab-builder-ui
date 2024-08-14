@@ -15,6 +15,7 @@ const jsonImportSelected = ref(0)
 const apiLookup = inject('apiLookup')
 const toLang = inject('toLang')
 const fromLang = inject('fromLang')
+const partsOfSpeech = inject('partsOfSpeech')
 
 const setApiKey = async () => {
   const res = await useFetch.value.fetch(
@@ -90,7 +91,7 @@ const headers = [
   },
   {
     text: 'Grammar Part',
-    value: 'Grammar Part',
+    value: 'parts',
     width: 100,
     sortable: true,
   },
@@ -106,7 +107,7 @@ const getItems = computed(() => {
         id: count++,
         [toLang.value?.name?.toLowerCase()]: entry[0],
         [fromLang.value?.name?.toLowerCase()]: entry[1].translations,
-        'Grammar Part': entry[1].part,
+        part: entry[1].part,
         opts: false,
       }
     })
@@ -115,7 +116,7 @@ const getItems = computed(() => {
         id: 0,
         [toLang.value?.name?.toLowerCase()]: '',
         [fromLang.value?.name?.toLowerCase()]: [],
-        'Grammar Part': '',
+        part: '',
         opts: false,
       })
     }
@@ -224,6 +225,26 @@ const exportJsonFile = async () => {
   const data = res.file
   downloadFile(data, 'json')
 }
+
+const options = computed(() => {
+  return partsOfSpeech.value
+})
+
+const selectPart = async (to, from, part) => {
+  console.log(`to ${to}, from ${from} part ${part}`)
+  let res = await useFetch.value.fetch(
+    `http://localhost:5000/vocab/update_entry`,
+    'POST',
+    {
+      from: from,
+      to: to,
+      part_of_speech: part,
+    }
+  )
+
+  res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all', 'GET')
+  vocab.value = res
+}
 </script>
 
 <template>
@@ -257,6 +278,29 @@ const exportJsonFile = async () => {
             </span>
             <button class="del-button hide" v-else></button>
           </div>
+        </template>
+        <template #item-parts="part">
+          <select
+            id="part"
+            :value="part.part"
+            :onchange="
+              e =>
+                selectPart(
+                  part[toLang.name?.toLowerCase()],
+                  part[fromLang.name?.toLowerCase()],
+                  e.target.value
+                )
+            "
+          >
+            <option
+              v-for="option in options"
+              :value="option"
+              totalWords
+              v-bind:key="option"
+            >
+              {{ option }}
+            </option>
+          </select>
         </template>
         <template #header-opts>
           <font-awesome-icon class="float-right" icon="fa-solid fa-ellipsis" />
@@ -481,7 +525,7 @@ header {
 }
 
 .float-child {
-  width: 700px;
+  width: 760px;
   float: left;
   padding: 20px;
 }
