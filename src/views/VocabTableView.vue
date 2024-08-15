@@ -451,9 +451,11 @@ const toggleShowSettings = () => {
           </div>
         </fieldset>
         <fieldset class="block" v-if="showSettings">
-          <legend>Vocabulary as CSV File (word and translation only)</legend>
+          <legend>
+            Vocabulary as CSV File (word, translation, and part of speech only)
+          </legend>
           <div class="row">
-            <label for="csvImport">Import</label>
+            <label for="csvImport">Upload additional vocabulary words</label>
             <form
               action="http://localhost:5000/vocab/import_csv"
               method="post"
@@ -475,20 +477,21 @@ const toggleShowSettings = () => {
             </form>
           </div>
           <div class="row">
-            <label for="csvExport">Export</label>
+            <label for="csvExport">Download existing vocabulary words</label>
             <button id="csvExport" @click="exportCsvFile">Download</button>
           </div>
           <div class="import-label">
-            Words imported from the csv file are added to the existing
+            Words uploaded from the csv file are added to the existing
             vocabulary
           </div>
         </fieldset>
         <fieldset class="block" v-if="showSettings">
           <legend>
-            Vocabulary as JSON File (includes test history and metadata)
+            Vocabulary as JSON File (word, translation, part of speech, and
+            flash card history)
           </legend>
           <div class="row">
-            <label for="jsonImport">Import</label>
+            <label for="jsonImport">Upload New Vocabulary</label>
             <form
               action="http://localhost:5000/vocab/import_json"
               method="post"
@@ -510,12 +513,13 @@ const toggleShowSettings = () => {
             </form>
           </div>
           <div class="row">
-            <label for="jsonExport">Export</label>
+            <label for="jsonExport">Download existing vocabulary</label>
             <button id="jsonExport" @click="exportJsonFile">Download</button>
           </div>
           <div class="import-label">
-            The JSON file you import will replace the existing vocabulary. Be
-            sure to export a backup and save it before importing a new one.
+            The JSON file you upload will replace the existing vocabulary. Be
+            sure to download the vocabulary first and save it as a backup before
+            uploading a new one.
           </div>
         </fieldset>
       </div>
