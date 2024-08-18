@@ -16,6 +16,7 @@ const currentPageNumber = ref(1)
 const fromLang = inject('fromLang')
 const toLang = inject('toLang')
 const showPartsTable = ref(false)
+const host = inject('host')
 
 const {
   currentPageFirstIndex,
@@ -72,7 +73,7 @@ const setDefRes = ref()
 
 const setDefaultLangs = async () => {
   const res = await useFetch.value.fetch(
-    `http://localhost:5000/languages/set_defaults`,
+    `http://${host.value}:5000/languages/set_defaults`,
     'POST',
     {
       from: fromLang.value.name,

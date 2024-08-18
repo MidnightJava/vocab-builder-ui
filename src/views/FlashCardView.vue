@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, watch, onMounted, computed } from 'vue'
+import { inject, ref, watch, computed } from 'vue'
 import { VueFlip } from 'vue-flip'
 import UseFetch from '../components/UseFetch.vue'
 
@@ -12,6 +12,7 @@ const fromWord = ref('')
 const toWord = ref('')
 
 const vocab = inject('vocab')
+const host = inject('host')
 
 const flipped = ref(false)
 
@@ -72,7 +73,7 @@ const nextWord = async () => {
 
   try {
     const res = await useFetch.value.fetch(
-      'http://localhost:5000/vocab/next_word',
+      `http://${host.value}:5000/vocab/next_word`,
       'GET'
     )
     if ('Error' in res) {
@@ -120,7 +121,7 @@ const translate = () => {
 
 const markCorrect = async () => {
   await useFetch.value.fetch(
-    'http://localhost:5000/vocab/mark_correct',
+    `http://${host.value}:5000/vocab/mark_correct`,
     'POST',
     {
       text: toWord.value,
@@ -131,7 +132,7 @@ const markCorrect = async () => {
 const setWordOrder = async () => {
   const wordOrder = reverseWordOrder.value ? 'to-from' : 'from-to'
   await useFetch.value.fetch(
-    'http://localhost:5000/vocab/set_word_order',
+    `http://${host.value}:5000/vocab/set_word_order`,
     'POST',
     {
       value: wordOrder,

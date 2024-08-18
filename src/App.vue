@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, provide, onMounted, watchEffect, watch } from 'vue'
+import { ref, computed, provide, watch, onMounted, watchEffect } from 'vue'
 import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
@@ -21,6 +21,7 @@ const partOfSpeech = ref('Any')
 const partsOfSpeech = ref([])
 const apiLookup = ref(true)
 const totalWords = ref(0)
+const host = ref('localhost')
 
 provide('langs', langs)
 provide('vocab', vocab)
@@ -34,6 +35,7 @@ provide('partOfSpeech', partOfSpeech)
 provide('partsOfSpeech', partsOfSpeech)
 provide('apiLookup', apiLookup)
 provide('totalWords', totalWords)
+provide('host', host)
 
 const compMap = {
   'Available Languages': AvailableLanguagesView,
@@ -44,32 +46,36 @@ const compMap = {
 const tabs = Object.keys(compMap)
 
 const selectWords = async () => {
-  const res = await useFetch.value.fetch(
-    'http://localhost:5000/vocab/select_words',
-    'GET'
-  )
+  const res = await useFetch.value
+    .fetch(`http://${host.value}:5000/vocab/select_words`, 'GET')
+    .catch(err => console.log(`Select words error: ${err.message}`))
   totalWords.value = Number(res.Result)
 }
 
-const init = async (fromLang, toLang) => {
-  await useFetch.value.fetch(
-    `http://localhost:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
-    'GET'
-  )
-  let res = await useFetch.value.fetch(
-    'http://localhost:5000/languages/get',
-    'GET'
-  )
+const init = async (fromLang = fromLang.value, toLang = toLang.value) => {
+  await useFetch.value
+    .fetch(
+      `http://${host.value}:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
+      'GET'
+    )
+    .catch(err => console.log(`Init error: ${err.message}`))
+  let res = await useFetch.value
+    .fetch(`http://${host.value}:5000/languages/get`, 'GET')
+    .catch(err => console.log(`Init error: ${err.message}`))
   langs.value = res
   if (!Object.keys(defLangs.value).length) {
-    res = await useFetch.value.fetch(
-      'http://localhost:5000/languages/get_defaults'
-    )
+    res = await useFetch.value
+      .fetch(`http://${host.value}:5000/languages/get_defaults`)
+      .catch(err => console.log(`Init error: ${err.message}`))
     defLangs.value = res
-    res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all')
+    res = await useFetch.value
+      .fetch(`http://${host.value}:5000/vocab/get_all`)
+      .catch(err => console.log(`Init error: ${err.message}`))
     vocab.value = res
   } else {
-    res = await useFetch.value.fetch('http://localhost:5000/vocab/get_all')
+    res = await useFetch.value
+      .fetch(`http://${host.value}:5000/vocab/get_all`)
+      .catch(err => console.log(`Init error: ${err.message}`))
     vocab.value = res
   }
   selectWords()
@@ -79,10 +85,9 @@ const init = async (fromLang, toLang) => {
 }
 
 const getPartsOfSpeech = async () => {
-  const res = await useFetch.value.fetch(
-    'http://localhost:5000/partsofspeech/get',
-    'GET'
-  )
+  const res = await useFetch.value
+    .fetch(`http://${host.value}:5000/partsofspeech/get`, 'GET')
+    .catch(err => console.log(`Get parts of speech error: ${err.message}`))
   partsOfSpeech.value = res
 }
 
@@ -144,14 +149,20 @@ watch(connected, newVal => {
 })
 
 watch(apiLookup, async newVal => {
-  await useFetch.value.fetch('http://localhost:5000/apilookup/set', 'POST', {
-    api_lookup: newVal,
-  })
+  await useFetch.value
+    .fetch(`http://${host.value}:5000/apilookup/set`, 'POST', {
+      api_lookup: newVal,
+    })
+    .catch(err => console.log(`API lookup error: ${err.message}`))
 })
 
 onMounted(() => {
   watchEffect(async () => {
-    init(fromLang.value, toLang.value)
+    try {
+      init(fromLang.value, toLang.value)
+    } catch (e) {
+      console.log('Init failed')
+    }
   })
 })
 </script>
@@ -178,7 +189,11 @@ onMounted(() => {
         class="reconnect-button"
         @click="
           () => {
-            init(fromLang, toLang)
+            try {
+              init(fromLang, toLang)
+            } catch (e) {
+              console.log('Init failed')
+            }
           }
         "
       >

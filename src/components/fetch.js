@@ -10,11 +10,6 @@ export const useFetch = async (url, method = 'GET', payload = null) => {
   if (res.status != 200) {
     return res.statusText
   }
-  // if (Error in res) {
-  //   connected.value = false
-  // } else {
-  //   connected.value = true
-  // }
-
-  return res.json()
+  const json = await res.json()
+  return json
 }
