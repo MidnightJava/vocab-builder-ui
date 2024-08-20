@@ -66,7 +66,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": { "data/": "data/" },
+      "resources": { "../data/": "data/" },
       "shortDescription": "",
       "windows": {
         "certificateThumbprint": null,
