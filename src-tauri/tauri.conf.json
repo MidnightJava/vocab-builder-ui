@@ -21,7 +21,11 @@
       "all": false,
       "shell": {
         "sidecar": true,
-        "scope": [{ "name": "binaries/server", "sidecar": true }]
+        "execute": true,
+        "scope": [
+          { "name": "binaries/server", "sidecar": true },
+          { "name": "printenv", "cmd": "printenv", "args": true }
+        ]
       },
       "http": {
         "all": true,

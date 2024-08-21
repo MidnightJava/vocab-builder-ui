@@ -32,12 +32,21 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
+  // read from .env
+  dotenv::load().ok();
+
+  // if cfg!(debug_assertions) {
+  //   dotenv::from_filename(".env.development").unwrap().load();
+  // } else {
+  //   dotenv::from_filename(".env.production").unwrap().load();
+  // }
+
   if let Err(e) = fix() {
     println!("{}", e);
   } else {
     let child = Command::new(&PROGRAM)
-        .spawn()
-        .expect("Failed to start process");
+    .spawn()
+    .expect("Failed to start process");
     tauri::Builder::default()
     .on_window_event(move|event| match event.event() {
         WindowEvent::Destroyed {  .. } => {
