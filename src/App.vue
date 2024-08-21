@@ -1,13 +1,5 @@
 <script setup>
-import {
-  ref,
-  computed,
-  provide,
-  watch,
-  onMounted,
-  watchEffect,
-  inject,
-} from 'vue'
+import { ref, computed, provide, watch, onMounted, watchEffect } from 'vue'
 import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
@@ -45,8 +37,7 @@ provide('apiLookup', apiLookup)
 provide('totalWords', totalWords)
 provide('host', host)
 
-const DEFAULT_SERVER_PORT = 5000
-const port = ref(DEFAULT_SERVER_PORT)
+const port = ref(null)
 provide('serverPort', port)
 
 try {
@@ -58,8 +49,9 @@ try {
     }
 
     port.value = commandResult.stdout
+    console.log(`Set port to ${port.value}`)
   }
-  readEnvVariable()
+  readEnvVariable('SERVER_PORT')
 } catch {
   //will fail outside tauri build
 }
@@ -185,14 +177,10 @@ watch(apiLookup, async newVal => {
     .catch(err => console.log(`API lookup error: ${err.message}`))
 })
 
-onMounted(() => {
-  watchEffect(async () => {
-    try {
-      init(fromLang.value, toLang.value)
-    } catch (e) {
-      console.log('Init failed')
-    }
-  })
+watchEffect(async () => {
+  if (port.value) {
+    init(fromLang.value, toLang.value)
+  }
 })
 </script>
 
