@@ -22,6 +22,7 @@ const dupEntry = ref(false)
 const getPartsFunc = inject('getPartsFunc')
 const newEntryInpElem = ref('')
 const host = inject('host')
+const port = inject('serverPort')
 
 watch(
   () => parts.value,
@@ -65,7 +66,7 @@ const deleteEntry = async item => {
 
 const applyChanges = async () => {
   await useFetch.value.fetch(
-    `http://${host.value}:5000/partsofspeech/set`,
+    `http://${host.value}:${port.value}/partsofspeech/set`,
     'POST',
     { partsOfSpeech: data.value }
   )

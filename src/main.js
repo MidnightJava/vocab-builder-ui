@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, ref, provide } from 'vue'
 import App from './App.vue'
 import 'vue3-easy-data-table/dist/style.css'
 import './assets/main.css'
@@ -14,15 +14,16 @@ import { faBars } from '@fortawesome/free-solid-svg-icons'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons'
 import { faRotate } from '@fortawesome/free-solid-svg-icons'
-
 import { useFetch } from './components/fetch.js'
 
 const host = 'localhost'
+const DEFAULT_SERVER_PORT = 5000
+const port = ref(DEFAULT_SERVER_PORT)
 
 const start = async () => {
   // Give the backend time to start up if needed
   try {
-    await useFetch(`http://${host}:5000/alive`, 'GET')
+    await useFetch(`http://${host}:${port.value}/alive`, 'GET')
     setupApp()
   } catch (e) {
     setTimeout(() => setupApp(), 1000)

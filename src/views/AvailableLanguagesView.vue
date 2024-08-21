@@ -17,6 +17,7 @@ const fromLang = inject('fromLang')
 const toLang = inject('toLang')
 const showPartsTable = ref(false)
 const host = inject('host')
+const port = inject('serverPort')
 
 const {
   currentPageFirstIndex,
@@ -73,7 +74,7 @@ const setDefRes = ref()
 
 const setDefaultLangs = async () => {
   const res = await useFetch.value.fetch(
-    `http://${host.value}:5000/languages/set_defaults`,
+    `http://${host.value}:${port.value}/languages/set_defaults`,
     'POST',
     {
       from: fromLang.value.name,

@@ -31,6 +31,7 @@ const apiLookup = inject('apiLookup')
 
 const partsOfSpeech = inject('partsOfSpeech')
 const part = inject('part')
+const port = inject('serverPort')
 
 const showModal = () => {
   role.value = 'add'
@@ -48,7 +49,7 @@ const closeModal = () => {
 
 const postEntry = async () => {
   let res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/${
+    `http://${host.value}:${port.value}/vocab/${
       role.value === 'add' ? 'add_entry' : 'update_entry'
     }`,
     'POST',
@@ -61,7 +62,7 @@ const postEntry = async () => {
   transResult.value = res
 
   res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/get_all`,
+    `http://${host.value}:${port.value}/vocab/get_all`,
     'GET'
   )
   vocab.value = res
@@ -98,7 +99,7 @@ const lookup = async () => {
   }
 
   const res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`,
+    `http://${host.value}:${port.value}/vocab/translate?from_lang=${frl}&to_lang=${tol}&word=${word}`,
     'GET'
   )
   if ('result' in res) {

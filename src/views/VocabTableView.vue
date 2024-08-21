@@ -19,10 +19,11 @@ const partsOfSpeech = inject('partsOfSpeech')
 const part = ref('')
 const showSettings = ref(false)
 const host = inject('host')
+const port = inject('serverPort')
 
 const setApiKey = async () => {
   const res = await useFetch.value.fetch(
-    `http://${host.value}:5000/api_key/set`,
+    `http://${host.value}:${port.value}/api_key/set`,
     'POST',
     { api_key: _apiKey.value }
   )
@@ -146,11 +147,11 @@ const deleteSelected = async () => {
   }
 
   await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/delete_entry`,
+    `http://${host.value}:${port.value}/vocab/delete_entry`,
     'POST',
     toDelete
   )
-  const res = await useFetch(`http://${host.value}:5000/vocab/get_all`)
+  const res = await useFetch(`http://${host.value}:${port.value}/vocab/get_all`)
   vocab.value = res
   itemsSelected.value = []
   vocab.value = res
@@ -158,14 +159,14 @@ const deleteSelected = async () => {
 
 const deleteEntry = async item => {
   await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/delete_entry`,
+    `http://${host.value}:${port.value}/vocab/delete_entry`,
     'POST',
     {
       key: item[toLang.value.name?.toLowerCase()],
     }
   )
   const res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/get_all`
+    `http://${host.value}:${port.value}/vocab/get_all`
   )
   vocab.value = res
 }
@@ -180,7 +181,7 @@ const editEntry = item => {
 
 onMounted(async () => {
   let res = await useFetch.value.fetch(
-    `http://${host.value}:5000/api_key`,
+    `http://${host.value}:${port.value}/api_key`,
     'GET'
   )
   if (!res) {
@@ -189,7 +190,7 @@ onMounted(async () => {
     _apiKey.value = apiKey.value = res?.result
     try {
       res = await useFetch.value.fetch(
-        `http://${host.value}:5000/vocab/translate?from_lang=en&to_lang=it&word=test`,
+        `http://${host.value}:${port.value}/vocab/translate?from_lang=en&to_lang=it&word=test`,
         'GET'
       )
       if (!res?.result) invalidKey.value = true
@@ -220,7 +221,7 @@ const downloadFile = (data, type) => {
 
 const exportCsvFile = async () => {
   const res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/export_csv`,
+    `http://${host.value}:${port.value}/vocab/export_csv`,
     'GET'
   )
   const data = res.file
@@ -229,7 +230,7 @@ const exportCsvFile = async () => {
 
 const exportJsonFile = async () => {
   const res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/export_json`,
+    `http://${host.value}:${port.value}/vocab/export_json`,
     'GET'
   )
   const data = res.file
@@ -243,7 +244,7 @@ const options = computed(() => {
 const selectPart = async (to, from, part) => {
   console.log(`to ${to}, from ${from} part ${part}`)
   let res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/update_entry`,
+    `http://${host.value}:${port.value}/vocab/update_entry`,
     'POST',
     {
       from: from,
@@ -253,7 +254,7 @@ const selectPart = async (to, from, part) => {
   )
 
   res = await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/get_all`,
+    `http://${host.value}:${port.value}/vocab/get_all`,
     'GET'
   )
   vocab.value = res
@@ -264,11 +265,11 @@ const toggleShowSettings = () => {
 }
 
 const uploadCsvUrl = computed(
-  () => `http://${host.value}:5000/vocab/import_csv`
+  () => `http://${host.value}:${port.value}/vocab/import_csv`
 )
 
 const uploadJsonUrl = computed(
-  () => `http://${host.value}:5000/vocab/import_json`
+  () => `http://${host.value}:${port.value}/vocab/import_json`
 )
 </script>
 

@@ -22,6 +22,7 @@ const wordCorrect = ref(true)
 
 const wordCount = ref(0)
 const totalWords = inject('totalWords')
+const port = inject('serverPort')
 
 const minCorrect = inject('minCorrect')
 const minAge = inject('minAge')
@@ -73,7 +74,7 @@ const nextWord = async () => {
 
   try {
     const res = await useFetch.value.fetch(
-      `http://${host.value}:5000/vocab/next_word`,
+      `http://${host.value}:${port.value}/vocab/next_word`,
       'GET'
     )
     if ('Error' in res) {
@@ -121,7 +122,7 @@ const translate = () => {
 
 const markCorrect = async () => {
   await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/mark_correct`,
+    `http://${host.value}:${port.value}/vocab/mark_correct`,
     'POST',
     {
       text: toWord.value,
@@ -132,7 +133,7 @@ const markCorrect = async () => {
 const setWordOrder = async () => {
   const wordOrder = reverseWordOrder.value ? 'to-from' : 'from-to'
   await useFetch.value.fetch(
-    `http://${host.value}:5000/vocab/set_word_order`,
+    `http://${host.value}:${port.value}/vocab/set_word_order`,
     'POST',
     {
       value: wordOrder,

@@ -1,5 +1,13 @@
 <script setup>
-import { ref, computed, provide, watch, onMounted, watchEffect } from 'vue'
+import {
+  ref,
+  computed,
+  provide,
+  watch,
+  onMounted,
+  watchEffect,
+  inject,
+} from 'vue'
 import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
@@ -37,6 +45,27 @@ provide('apiLookup', apiLookup)
 provide('totalWords', totalWords)
 provide('host', host)
 
+const DEFAULT_SERVER_PORT = 5000
+const port = ref(DEFAULT_SERVER_PORT)
+provide('serverPort', port)
+
+try {
+  const Command = window.__TAURI__.shell.Command
+  const readEnvVariable = async variableName => {
+    const commandResult = await new Command('printenv', variableName).execute()
+    if (commandResult.code !== 0) {
+      throw new Error(commandResult.stderr)
+    }
+
+    port.value = commandResult.stdout
+  }
+  readEnvVariable()
+} catch {
+  //will fail outside tauri build
+}
+
+console.log(`PORT: ${port.value}`)
+
 const compMap = {
   'Available Languages': AvailableLanguagesView,
   'Saved Vocabulary': VocabTableView,
@@ -47,34 +76,34 @@ const tabs = Object.keys(compMap)
 
 const selectWords = async () => {
   const res = await useFetch.value
-    .fetch(`http://${host.value}:5000/vocab/select_words`, 'GET')
+    .fetch(`http://${host.value}:${port.value}/vocab/select_words`, 'GET')
     .catch(err => console.log(`Select words error: ${err.message}`))
-  totalWords.value = Number(res.Result)
+  totalWords.value = Number(res?.Result)
 }
 
 const init = async (fromLang = fromLang.value, toLang = toLang.value) => {
   await useFetch.value
     .fetch(
-      `http://${host.value}:5000/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
+      `http://${host.value}:${port.value}/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
       'GET'
     )
     .catch(err => console.log(`Init error: ${err.message}`))
   let res = await useFetch.value
-    .fetch(`http://${host.value}:5000/languages/get`, 'GET')
+    .fetch(`http://${host.value}:${port.value}/languages/get`, 'GET')
     .catch(err => console.log(`Init error: ${err.message}`))
   langs.value = res
-  if (!Object.keys(defLangs.value).length) {
+  if (!Object.keys(defLangs?.value || {})?.length) {
     res = await useFetch.value
-      .fetch(`http://${host.value}:5000/languages/get_defaults`)
+      .fetch(`http://${host.value}:${port.value}/languages/get_defaults`)
       .catch(err => console.log(`Init error: ${err.message}`))
     defLangs.value = res
     res = await useFetch.value
-      .fetch(`http://${host.value}:5000/vocab/get_all`)
+      .fetch(`http://${host.value}:${port.value}/vocab/get_all`)
       .catch(err => console.log(`Init error: ${err.message}`))
     vocab.value = res
   } else {
     res = await useFetch.value
-      .fetch(`http://${host.value}:5000/vocab/get_all`)
+      .fetch(`http://${host.value}:${port.value}/vocab/get_all`)
       .catch(err => console.log(`Init error: ${err.message}`))
     vocab.value = res
   }
@@ -86,7 +115,7 @@ const init = async (fromLang = fromLang.value, toLang = toLang.value) => {
 
 const getPartsOfSpeech = async () => {
   const res = await useFetch.value
-    .fetch(`http://${host.value}:5000/partsofspeech/get`, 'GET')
+    .fetch(`http://${host.value}:${port.value}/partsofspeech/get`, 'GET')
     .catch(err => console.log(`Get parts of speech error: ${err.message}`))
   partsOfSpeech.value = res
 }
@@ -99,7 +128,7 @@ const currentTabComponent = computed(() => {
 
 const setFromId = name => {
   let found = false
-  for (let id of Object.keys(langs.value)) {
+  for (let id of Object.keys(langs?.value || {})) {
     if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
       fromLang.value.id = id
       found = true
@@ -115,7 +144,7 @@ provide('setFromIdFunc', setFromId)
 
 const setToId = name => {
   let found = false
-  for (let id of Object.keys(langs.value)) {
+  for (let id of Object.keys(langs?.value || {})) {
     if (langs.value[id].name?.toLowerCase() === name.toLowerCase()) {
       toLang.value.id = id
       found = true
@@ -130,16 +159,16 @@ const setToId = name => {
 provide('setToIdFunc', setToId)
 
 const initialCap = s => {
-  return s.charAt(0).toUpperCase() + s.slice(1)
+  return s?.charAt(0).toUpperCase() + s?.slice(1)
 }
 
 provide('initialCap', initialCap)
 
 watch(defLangs, newVal => {
-  fromLang.value.name = initialCap(newVal.from)
-  setFromId(newVal.from)
-  toLang.value.name = initialCap(newVal.to)
-  setToId(newVal.to)
+  fromLang.value.name = initialCap(newVal?.from)
+  setFromId(newVal?.from)
+  toLang.value.name = initialCap(newVal?.to)
+  setToId(newVal?.to)
 })
 
 watch(connected, newVal => {
@@ -150,7 +179,7 @@ watch(connected, newVal => {
 
 watch(apiLookup, async newVal => {
   await useFetch.value
-    .fetch(`http://${host.value}:5000/apilookup/set`, 'POST', {
+    .fetch(`http://${host.value}:${port.value}/apilookup/set`, 'POST', {
       api_lookup: newVal,
     })
     .catch(err => console.log(`API lookup error: ${err.message}`))
