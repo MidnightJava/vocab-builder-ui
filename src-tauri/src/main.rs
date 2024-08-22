@@ -2,10 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use fix_path_env::fix;
+use std::env;
 use std::process::{Command};
 use tauri::{WindowEvent};
-
-static PROGRAM:&str = "binaries/server-x86_64-unknown-linux-gnu";
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
@@ -38,26 +37,31 @@ fn main() {
   // if cfg!(debug_assertions) {
   //   dotenv::from_filename(".env.development").unwrap().load();
   // } else {
-  //   dotenv::from_filename(".env.production").unwrap().load();
+  //   dotenv::from_filename(".env").unwrap().load();
   // }
 
   if let Err(e) = fix() {
     println!("{}", e);
   } else {
-    let child = Command::new(&PROGRAM)
-    .spawn()
-    .expect("Failed to start process");
-    tauri::Builder::default()
-    .on_window_event(move|event| match event.event() {
-        WindowEvent::Destroyed {  .. } => {
-          match kill_process(&child.id().to_string()) {
-            Ok(_) => println!("Process killed successfully."),
-            Err(e) => eprintln!("Failed to kill process: {}", e),
-          }
-        }
-        _ => {}
-     })
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+   
+      let binary_path = "server";
+        println!("Binary path: {:?}", binary_path);
+
+        let child = Command::new(binary_path)
+            .spawn()
+            .expect("Failed to start process");
+
+        tauri::Builder::default()
+            .on_window_event(move |event| match event.event() {
+                WindowEvent::Destroyed { .. } => {
+                    match kill_process(&child.id().to_string()) {
+                        Ok(_) => println!("Process killed successfully."),
+                        Err(e) => eprintln!("Failed to kill process: {}", e),
+                    }
+                }
+                _ => {}
+            })
+            .run(tauri::generate_context!())
+            .expect("error while running tauri application");
   }
 }

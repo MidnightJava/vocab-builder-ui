@@ -43,8 +43,9 @@
         "removeFile": true,
         "renameFile": true,
         "exists": true,
-        "scope": ["$RESOURCE/data/*"]
-      }
+        "scope": ["$RESOURCE/*"]
+      },
+      "path": { "all": true }
     },
     "bundle": {
       "active": true,
@@ -70,7 +71,9 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": { "../data/": "data/" },
+      "resources": {
+        "../data/": "/etc/vocab-builder/data/"
+      },
       "shortDescription": "",
       "windows": {
         "certificateThumbprint": null,

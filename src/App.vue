@@ -37,7 +37,9 @@ provide('apiLookup', apiLookup)
 provide('totalWords', totalWords)
 provide('host', host)
 
-const port = ref(null)
+const env = import.meta.env
+const portVal = env.VITE_SERVER_PORT
+const port = portVal ? ref(portVal) : ref(null)
 provide('serverPort', port)
 
 try {

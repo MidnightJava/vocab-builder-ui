@@ -60,11 +60,11 @@ const getItems = computed(() => {
 })
 
 const setTo = obj => {
-  toLang.value = obj
+  toLang.value = Object.assign({}, obj)
 }
 
 const setFrom = obj => {
-  fromLang.value = obj
+  fromLang.value = Object.assign({}, obj)
 }
 
 const setFromId = inject('setFromIdFunc')
@@ -91,24 +91,6 @@ const showOpt = ref(0)
 const toggleShowParts = () => {
   showPartsTable.value = !showPartsTable.value
 }
-
-watch(
-  () => toLang.value.name,
-  (newv, oldv) => {
-    if (newv == fromLang.value.name) {
-      toLang.value.name = oldv
-    }
-  }
-)
-
-watch(
-  () => fromLang.value.name,
-  (newv, oldv) => {
-    if (newv == toLang.value.name) {
-      fromLang.value.name = oldv
-    }
-  }
-)
 </script>
 
 <template>
