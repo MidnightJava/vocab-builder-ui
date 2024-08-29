@@ -4,6 +4,8 @@
 use fix_path_env::fix;
 use std::env;
 use std::process::{Command};
+use std::path::PathBuf;
+// use tauri::api::process::Command;
 use tauri::{WindowEvent};
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -43,11 +45,16 @@ fn main() {
   if let Err(e) = fix() {
     println!("{}", e);
   } else {
-   
-      let binary_path = "server";
+        let current_dir = env::current_dir().unwrap();
+        let binary_path: PathBuf;
+        if cfg!(debug_assertions) {
+          binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
+        } else {
+          binary_path = current_dir.join("bin/server");
+        }
         println!("Binary path: {:?}", binary_path);
 
-        let child = Command::new(binary_path)
+        let child = Command::new(binary_path.as_path())
             .spawn()
             .expect("Failed to start process");
 

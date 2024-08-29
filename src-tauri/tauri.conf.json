@@ -71,9 +71,6 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": {
-        "../data/": "/etc/vocab-builder/data/"
-      },
       "shortDescription": "",
       "windows": {
         "certificateThumbprint": null,
