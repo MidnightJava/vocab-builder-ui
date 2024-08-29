@@ -3,10 +3,9 @@
 
 use fix_path_env::fix;
 use std::env;
-use std::process::{Command};
+use std::process::Command;
 use std::path::PathBuf;
-// use tauri::api::process::Command;
-use tauri::{WindowEvent};
+use tauri::WindowEvent;
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
