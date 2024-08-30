@@ -8,7 +8,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "vocabulary-builder",
+    "productName": "vocab-builder",
     "version": "0.1.0"
   },
   "plugins": {
@@ -49,7 +49,7 @@
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
+      "category": "Education",
       "copyright": "",
       "deb": {
         "depends": []
