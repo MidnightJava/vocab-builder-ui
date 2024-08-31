@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, provide, watch, onMounted, watchEffect } from 'vue'
+import { ref, computed, provide, watch, watchEffect } from 'vue'
 import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
@@ -22,6 +22,7 @@ const partsOfSpeech = ref([])
 const apiLookup = ref(true)
 const totalWords = ref(0)
 const host = ref('localhost')
+const retries = ref(0)
 
 provide('langs', langs)
 provide('vocab', vocab)
@@ -38,6 +39,7 @@ provide('totalWords', totalWords)
 provide('host', host)
 
 const env = import.meta.env
+// This variable is only needed in dev mode, outside of tauri
 const portVal = env.VITE_SERVER_PORT
 const port = portVal ? ref(portVal) : ref(null)
 provide('serverPort', port)
@@ -57,8 +59,6 @@ try {
 } catch {
   //will fail outside tauri build
 }
-
-console.log(`PORT: ${port.value}`)
 
 const compMap = {
   'Available Languages': AvailableLanguagesView,
@@ -210,6 +210,7 @@ watchEffect(async () => {
           () => {
             try {
               init(fromLang, toLang)
+              retries += 1
             } catch (e) {
               console.log('Init failed')
             }
@@ -218,6 +219,11 @@ watchEffect(async () => {
       >
         Reconnect
       </button>
+    </div>
+    <div v-if="retries > 1" class="retry-label">
+      Check the application log. Perhaps the port is already in use. Either stop
+      the process that is using the port identified in the log or set the
+      environment variable SEVER_PORT to point to an available port.
     </div>
   </div>
 </template>
@@ -237,6 +243,9 @@ watchEffect(async () => {
 .reconnect-label {
   margin-top: auto;
   color: red;
+}
+.retry-label {
+  margin-top: 20px;
 }
 .tab-button {
   padding: 6px 10px;
