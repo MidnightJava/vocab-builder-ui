@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "tauri": "tauri",
+    "post-build": "./move_python_files.sh",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
