@@ -20,8 +20,8 @@ async function main(files) {
   }
   files.forEach(file => {
     fs.renameSync(
-      `src-tauri/binaries/${file}/${file}${extension}`,
-      `src-tauri/binaries/${file}/${file}-${targetTriple}${extension}`
+      `src-tauri/binaries/${file}${extension}`,
+      `src-tauri/binaries/${file}-${targetTriple}${extension}`
     )
   })
 }

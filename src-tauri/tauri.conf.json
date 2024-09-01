@@ -54,7 +54,7 @@
       "deb": {
         "depends": []
       },
-      "externalBin": ["binaries/server/server"],
+      "externalBin": ["binaries/server"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -62,7 +62,6 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "resources": { "binaries/server/_internal": "usr/bin/_internal" },
       "identifier": "net.midnightjava.vocabbuilder",
       "longDescription": "",
       "macOS": {
