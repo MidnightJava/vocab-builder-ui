@@ -1,4 +1,4 @@
-import { createApp, ref, provide } from 'vue'
+import { createApp, ref } from 'vue'
 import App from './App.vue'
 import 'vue3-easy-data-table/dist/style.css'
 import './assets/main.css'
@@ -17,8 +17,11 @@ import { faRotate } from '@fortawesome/free-solid-svg-icons'
 import { useFetch } from './components/fetch.js'
 
 const host = 'localhost'
-const DEFAULT_SERVER_PORT = 5000
-const port = ref(DEFAULT_SERVER_PORT)
+const env = import.meta.env
+const portVal = env.VITE_SERVER_PORT
+//Need to set VITE_SERVER_PPORT and SERVER_PORT to same value
+//TODO Use VITE_SERVER_PORT on backend so only one setting is needed
+const port = ref(portVal)
 
 const start = async () => {
   // Give the backend time to start up if needed
