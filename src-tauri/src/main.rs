@@ -5,6 +5,7 @@ use fix_path_env::fix;
 use std::env;
 use std::process::Command;
 use std::path::PathBuf;
+use std::path::Path;
 use tauri::WindowEvent;
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -49,7 +50,9 @@ fn main() {
         if cfg!(debug_assertions) {
           binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
         } else {
-          binary_path = current_dir.join("bin/server");
+          //This works for Linux AppImage. Need just server for MacOS App bundle
+          // binary_path = current_dir.join("bin/server");//
+          binary_path = Path::new("server").to_path_buf();
         }
         println!("Binary path: {:?}", binary_path);
 
