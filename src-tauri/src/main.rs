@@ -3,9 +3,9 @@
 
 use fix_path_env::fix;
 use std::env;
-use std::process::Command;
-use std::path::PathBuf;
 use std::path::Path;
+use std::path::PathBuf;
+use std::process::Command;
 use tauri::WindowEvent;
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -13,9 +13,7 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     {
         println!("Sending INT signal to process with PID: {}", pid);
 
-        let mut kill = Command::new("kill")
-            .args(["-s", "SIGINT", &pid])
-            .spawn()?;
+        let mut kill = Command::new("kill").args(["-s", "SIGINT", &pid]).spawn()?;
         kill.wait()?;
     }
 
@@ -33,26 +31,26 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
-  // read from .env
-  dotenv::load().ok();
-
-  // if cfg!(debug_assertions) {
-  //   dotenv::from_filename(".env.development").unwrap().load();
-  // } else {
-  //   dotenv::from_filename(".env").unwrap().load();
-  // }
-
-  if let Err(e) = fix() {
-    println!("{}", e);
-  } else {
+    if let Err(e) = fix() {
+        println!("{}", e);
+    } else {
+        let os: &str = env::consts::OS;
         let current_dir = env::current_dir().unwrap();
         let binary_path: PathBuf;
         if cfg!(debug_assertions) {
-          binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
+            //TODO don't hardcode target triple
+            binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
         } else {
-          //This works for Linux AppImage. Need just server for MacOS App bundle
-          // binary_path = current_dir.join("bin/server");//
-          binary_path = Path::new("server").to_path_buf();
+            if os == "linux" {
+                binary_path = Path::new("server").to_path_buf();
+            } else if os == "macos" {
+                //need path relative to top-level Bundle path
+                binary_path = Path::new("TBD").to_path_buf();
+            } else if os == "windows" {
+                binary_path = Path::new("TBD").to_path_buf();
+            } else {
+                binary_path = Path::new("").to_path_buf();
+            }
         }
         println!("Binary path: {:?}", binary_path);
 
@@ -62,15 +60,13 @@ fn main() {
 
         tauri::Builder::default()
             .on_window_event(move |event| match event.event() {
-                WindowEvent::Destroyed { .. } => {
-                    match kill_process(&child.id().to_string()) {
-                        Ok(_) => println!("Process killed successfully."),
-                        Err(e) => eprintln!("Failed to kill process: {}", e),
-                    }
-                }
+                WindowEvent::Destroyed { .. } => match kill_process(&child.id().to_string()) {
+                    Ok(_) => println!("Process killed successfully."),
+                    Err(e) => eprintln!("Failed to kill process: {}", e),
+                },
                 _ => {}
             })
             .run(tauri::generate_context!())
             .expect("error while running tauri application");
-  }
+    }
 }

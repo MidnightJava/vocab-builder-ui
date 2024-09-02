@@ -43,3 +43,11 @@ Point your web browser to http://localhost:5173
 
 2. npm run tauri dev
 ```
+
+### Notes
+
+```
+1. Environment var VITE_SERVER_PORT must be set to an available port.
+The value will be read by the frontend and backend to ensure a
+successful connection.
+```

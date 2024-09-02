@@ -17,10 +17,9 @@ import { faRotate } from '@fortawesome/free-solid-svg-icons'
 import { useFetch } from './components/fetch.js'
 
 const host = 'localhost'
+const DEFAULT_PORT = 5023
 const env = import.meta.env
-const portVal = env.VITE_SERVER_PORT
-//Need to set VITE_SERVER_PPORT and SERVER_PORT to same value
-//TODO Use VITE_SERVER_PORT on backend so only one setting is needed
+const portVal = env?.VITE_SERVER_PORT || DEFAULT_PORT
 const port = ref(portVal)
 
 const start = async () => {

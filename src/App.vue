@@ -39,8 +39,13 @@ provide('totalWords', totalWords)
 provide('host', host)
 
 const env = import.meta.env
-// This variable is only needed in dev mode, outside of tauri
-const portVal = env.VITE_SERVER_PORT
+/* VITE_SERVER_PORT is read directly by the frontend and
+backend. The fontend also queries the backend for the value,
+but this does not work in Windows. This superfluous query is 
+left in place in case Windows supports the printenv command
+some day.
+*/
+const portVal = env?.VITE_SERVER_PORT
 const port = portVal ? ref(portVal) : ref(null)
 provide('serverPort', port)
 
@@ -49,13 +54,15 @@ try {
   const readEnvVariable = async variableName => {
     const commandResult = await new Command('printenv', variableName).execute()
     if (commandResult.code !== 0) {
-      throw new Error(commandResult.stderr)
+      return console.log(
+        `Unable to get server port. Command returned ${commandResult.stderr}`
+      )
     }
 
     port.value = commandResult.stdout
     console.log(`Set port to ${port.value}`)
   }
-  readEnvVariable('SERVER_PORT')
+  readEnvVariable('VITE_SERVER_PORT')
 } catch {
   //will fail outside tauri build
 }
