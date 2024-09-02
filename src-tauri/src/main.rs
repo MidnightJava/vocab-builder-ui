@@ -50,12 +50,12 @@ fn main() {
 
                 let bundle_path: PathBuf = current_exe
                     .parent() // MacOS directory
-                    .and_then(|p| p.parent()) // Contents directory
-                    .and_then(|p| p.parent()) // .app directory
+                    // .and_then(|p| p.parent()) // Contents directory
+                    // .and_then(|p| p.parent()) // .app directory
                     .expect("Failed to get bundle path")
                     .to_path_buf();
 
-                binary_path = bundle_path.join("Contents/MacOS/server");
+                binary_path = bundle_path.join("server");
                 println!("Bundle path: {}", bundle_path.display());
                 println!("Binary path: {}", binary_path.display());
             } else if os == "windows" {
