@@ -63,7 +63,7 @@ fn main() {
                     .expect("Failed to get bundle path")
                     .to_path_buf();
 
-                binary_path = bundle_path.join("Contents/MacOS/vocab-builder");
+                binary_path = bundle_path.join("Contents/MacOS/server");
                 println!("Bundle path: {}", bundle_path.display());
                 println!("Binary path: {}", binary_path.display());
             } else if os == "windows" {
@@ -88,5 +88,6 @@ fn main() {
             })
             .run(tauri::generate_context!())
             .expect("error while running tauri application");
+	    return;
     }
 }
