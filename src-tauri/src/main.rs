@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use fix_path_env::fix;
+// use objc::{class, msg_send, runtime};
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -45,6 +46,25 @@ fn main() {
                 binary_path = Path::new("server").to_path_buf();
             } else if os == "macos" {
                 //need path relative to top-level Bundle path
+                // use mac_bundle::main_bundle;
+                // let bundle = main_bundle();
+                // let resource_path = "/";
+                // let bundle_path = bundle.path_for_resource(resource_path)?;
+                // println!("Bundle PathL {}", bundle_path);
+                // let nsbundle_class = class!("NSBundle");
+                // let mainBundle = msg_send![nsbundle_class, mainBundle];
+                let current_exe =
+                    env::current_exe().expect("Failed to get current executable path");
+
+                let bundle_path: PathBuf = current_exe
+                    .parent() // MacOS directory
+                    .and_then(|p| p.parent()) // Contents directory
+                    .and_then(|p| p.parent()) // .app directory
+                    .expect("Failed to get bundle path")
+                    .to_path_buf();
+
+                println!("Bundle path: {}", bundle_path.display());
+
                 binary_path = Path::new("TBD").to_path_buf();
             } else if os == "windows" {
                 binary_path = Path::new("TBD").to_path_buf();
