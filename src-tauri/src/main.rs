@@ -63,11 +63,9 @@ fn main() {
                     .expect("Failed to get bundle path")
                     .to_path_buf();
 
-                let executable_path: PathBuf = bundle_path.join("Contents/MacOS/vocab-builder");
+                binary_path = bundle_path.join("Contents/MacOS/vocab-builder");
                 println!("Bundle path: {}", bundle_path.display());
-                println!("Executable path: {}", executable_path.display());
-
-                binary_path = Path::new("TBD").to_path_buf();
+                println!("Binary path: {}", binary_path.display());
             } else if os == "windows" {
                 binary_path = Path::new("TBD").to_path_buf();
             } else {
