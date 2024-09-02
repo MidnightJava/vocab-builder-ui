@@ -50,8 +50,6 @@ fn main() {
 
                 let bundle_path: PathBuf = current_exe
                     .parent() // MacOS directory
-                    // .and_then(|p| p.parent()) // Contents directory
-                    // .and_then(|p| p.parent()) // .app directory
                     .expect("Failed to get bundle path")
                     .to_path_buf();
 
