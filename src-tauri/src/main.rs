@@ -45,14 +45,6 @@ fn main() {
             if os == "linux" {
                 binary_path = Path::new("server").to_path_buf();
             } else if os == "macos" {
-                //need path relative to top-level Bundle path
-                // use mac_bundle::main_bundle;
-                // let bundle = main_bundle();
-                // let resource_path = "/";
-                // let bundle_path = bundle.path_for_resource(resource_path)?;
-                // println!("Bundle PathL {}", bundle_path);
-                // let nsbundle_class = class!("NSBundle");
-                // let mainBundle = msg_send![nsbundle_class, mainBundle];
                 let current_exe =
                     env::current_exe().expect("Failed to get current executable path");
 
@@ -88,6 +80,5 @@ fn main() {
             })
             .run(tauri::generate_context!())
             .expect("error while running tauri application");
-	    return;
     }
 }
