@@ -4,6 +4,7 @@ import UseFetch from './components/UseFetch.vue'
 import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
 import AvailableLanguagesView from './views/AvailableLanguagesView.vue'
+import { DEFAULT_PORT } from './main'
 
 let currentTab = ref('Available Languages')
 
@@ -46,7 +47,7 @@ left in place in case Windows supports the printenv command
 some day.
 */
 const portVal = env?.VITE_SERVER_PORT
-const port = portVal ? ref(portVal) : ref(null)
+const port = portVal ? ref(portVal) : ref(DEFAULT_PORT)
 provide('serverPort', port)
 
 try {
