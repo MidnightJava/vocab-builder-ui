@@ -4,8 +4,10 @@ import fs from 'fs'
 const USAGE = 'node ./append-target-triple file [...file]'
 
 let extension = ''
+let sep = "/"
 if (process.platform === 'win32') {
   extension = '.exe'
+  sep = "\"
 }
 
 const usage = () => {
@@ -20,8 +22,8 @@ async function main(files) {
   }
   files.forEach(file => {
     fs.renameSync(
-      `src-tauri/binaries/${file}${extension}`,
-      `src-tauri/binaries/${file}-${targetTriple}${extension}`
+      `src-tauri${sep}binaries${sep}${file}${extension}`,
+      `src-tauri${sep}binaries${sep}${file}-${targetTriple}${extension}`
     )
   })
 }
