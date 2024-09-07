@@ -4,10 +4,10 @@ import fs from 'fs'
 const USAGE = 'node ./append-target-triple file [...file]'
 
 let extension = ''
-let sep = "/"
+let sep = '/'
 if (process.platform === 'win32') {
   extension = '.exe'
-  sep = "\"
+  sep = '\\'
 }
 
 const usage = () => {
