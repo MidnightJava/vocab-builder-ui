@@ -57,7 +57,7 @@ fn main() {
                 println!("Bundle path: {}", bundle_path.display());
                 println!("Binary path: {}", binary_path.display());
             } else if os == "windows" {
-                binary_path = Path::new("TBD").to_path_buf();
+                binary_path = Path::new("server.exe").to_path_buf();
             } else {
                 binary_path = Path::new("").to_path_buf();
             }
