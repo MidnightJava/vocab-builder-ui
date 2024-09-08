@@ -6,6 +6,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::WindowEvent;
+use tauri::Manager;
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt; // Windows-specific
