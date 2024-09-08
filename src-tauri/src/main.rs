@@ -86,13 +86,13 @@ fn main() {
         .expect("Failed to start process");
 
     tauri::Builder::default()
-        .on_window_event(move |event| match event.event() {
-            WindowEvent::Destroyed { .. } => match kill_process(&child.id().to_string()) {
-                Ok(_) => println!("Process killed successfully."),
-                Err(e) => eprintln!("Failed to kill process: {}", e),
-            },
-            _ => {}
-        })
+        // .on_window_event(move |event| match event.event() {
+        //     WindowEvent::Destroyed { .. } => match kill_process(&child.id().to_string()) {
+        //         Ok(_) => println!("Process killed successfully."),
+        //         Err(e) => eprintln!("Failed to kill process: {}", e),
+        //     },
+        //     _ => {}
+        // })
         .setup(|app| {
             println!("Setting up the app");
             let window = app.get_window("main").unwrap();
