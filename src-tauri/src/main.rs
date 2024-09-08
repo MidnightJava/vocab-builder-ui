@@ -60,8 +60,8 @@ fn main() {
             // Windows-specific process creation with CREATE_NO_WINDOW
             #[cfg(windows)]
             match Command::new(binary_path.as_path())
-                .creation_flags(0x08000000) // CREATE_NO_WINDOW flag for Windows
                 .spawn()
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW flag for Windows
             {
                 Ok(child) => {
                     println!("Process started successfully");
