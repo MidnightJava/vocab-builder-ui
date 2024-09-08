@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use env_logger;
 use log::info;
 use std::env;
 use std::path::Path;
@@ -35,6 +36,8 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
+    env_logger::init(); // Initializes the logger
+    info!("Logging initialized"); // Log a message for testing
     let os: &str = env::consts::OS;
     let current_dir = env::current_dir().unwrap();
     let binary_path: PathBuf;
@@ -95,11 +98,10 @@ fn main() {
         //     _ => {}
         // })
         .setup(|app| {
-            tauri::log::init().expect("Failed to initialize logger");
-            log::info!("Setting up the app");
+            info!("Setting up the app");
             let window = app.get_window("main").unwrap();
             window.show().unwrap(); // Try explicitly showing the window
-            log::info!("Window should be visible now");
+            info!("Window should be visible now");
             Ok(())
         })
         .run(tauri::generate_context!())

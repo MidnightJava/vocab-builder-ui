@@ -27,6 +27,7 @@ tauri = { version = "1.7.0", features = [ "path-all", "shell-execute", "fs-all",
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 dotenvs = "0.1.0"
 log = "0.4"
+env_logger = "0.9"
 
 # Add winapi dependency only for Windows
 [target.'cfg(windows)'.dependencies]
