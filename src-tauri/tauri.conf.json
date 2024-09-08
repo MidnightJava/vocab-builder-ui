@@ -17,6 +17,7 @@
     }
   },
   "tauri": {
+    "log": { "level": "debug" },
     "allowlist": {
       "all": false,
       "shell": {
