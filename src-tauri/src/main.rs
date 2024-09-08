@@ -7,6 +7,9 @@ use std::path::PathBuf;
 use std::process::Command;
 use tauri::WindowEvent;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt; // Windows-specific
+
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
     {
@@ -43,7 +46,7 @@ fn main() {
             let current_exe = env::current_exe().expect("Failed to get current executable path");
 
             let bundle_path: PathBuf = current_exe
-                .parent() // MacOS directory
+                .parent()
                 .expect("Failed to get bundle path")
                 .to_path_buf();
 
@@ -52,17 +55,27 @@ fn main() {
             println!("Binary path: {}", binary_path.display());
         } else if os == "windows" {
             binary_path = Path::new("server.exe").to_path_buf();
+            println!("Binary path: {:?}", binary_path);
+
+            // Windows-specific process creation with CREATE_NO_WINDOW
+            #[cfg(windows)]
+            let child = Command::new(binary_path.as_path())
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW flag for Windows
+                .spawn()
+                .expect("Failed to start process");
+
+            return; // Exit early for Windows after process creation
         } else {
             binary_path = Path::new("").to_path_buf();
         }
     }
+
     println!("Binary path: {:?}", binary_path);
 
     let mut child_command = Command::new(binary_path.as_path());
 
     #[cfg(windows)]
     {
-        use std::os::windows::process::CommandExt; // Windows-specific command extension
         use winapi::um::winbase::CREATE_NO_WINDOW;
         child_command.creation_flags(CREATE_NO_WINDOW);
     }
