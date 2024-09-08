@@ -1,8 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use fix_path_env::fix;
-// use objc::{class, msg_send, runtime};
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -32,52 +30,53 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
-    if let Err(e) = fix() {
-        println!("{}", e);
+    let os: &str = env::consts::OS;
+    let current_dir = env::current_dir().unwrap();
+    let binary_path: PathBuf;
+
+    if cfg!(debug_assertions) {
+        binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
     } else {
-        let os: &str = env::consts::OS;
-        let current_dir = env::current_dir().unwrap();
-        let binary_path: PathBuf;
-        if cfg!(debug_assertions) {
-            //TODO don't hardcode target triple
-            binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
+        if os == "linux" {
+            binary_path = Path::new("server").to_path_buf();
+        } else if os == "macos" {
+            let current_exe = env::current_exe().expect("Failed to get current executable path");
+
+            let bundle_path: PathBuf = current_exe
+                .parent() // MacOS directory
+                .expect("Failed to get bundle path")
+                .to_path_buf();
+
+            binary_path = bundle_path.join("server");
+            println!("Bundle path: {}", bundle_path.display());
+            println!("Binary path: {}", binary_path.display());
+        } else if os == "windows" {
+            binary_path = Path::new("server.exe").to_path_buf();
         } else {
-            if os == "linux" {
-                binary_path = Path::new("server").to_path_buf();
-            } else if os == "macos" {
-                let current_exe =
-                    env::current_exe().expect("Failed to get current executable path");
-
-                let bundle_path: PathBuf = current_exe
-                    .parent() // MacOS directory
-                    .expect("Failed to get bundle path")
-                    .to_path_buf();
-
-                binary_path = bundle_path.join("server");
-                println!("Bundle path: {}", bundle_path.display());
-                println!("Binary path: {}", binary_path.display());
-            } else if os == "windows" {
-                binary_path = Path::new("server.exe").to_path_buf();
-            } else {
-                binary_path = Path::new("").to_path_buf();
-            }
+            binary_path = Path::new("").to_path_buf();
         }
-        println!("Binary path: {:?}", binary_path);
-
-        let child: std::process::Child = Command::new(binary_path.as_path())
-            .args(["/invisible"])
-            .spawn()
-            .expect("Failed to start process");
-
-        tauri::Builder::default()
-            .on_window_event(move |event| match event.event() {
-                WindowEvent::Destroyed { .. } => match kill_process(&child.id().to_string()) {
-                    Ok(_) => println!("Process killed successfully."),
-                    Err(e) => eprintln!("Failed to kill process: {}", e),
-                },
-                _ => {}
-            })
-            .run(tauri::generate_context!())
-            .expect("error while running tauri application");
     }
+    println!("Binary path: {:?}", binary_path);
+
+    let mut child_command = Command::new(binary_path.as_path());
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt; // Windows-specific command extension
+        use winapi::um::winbase::CREATE_NO_WINDOW;
+        child_command.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    let child = child_command.spawn().expect("Failed to start process");
+
+    tauri::Builder::default()
+        .on_window_event(move |event| match event.event() {
+            WindowEvent::Destroyed { .. } => match kill_process(&child.id().to_string()) {
+                Ok(_) => println!("Process killed successfully."),
+                Err(e) => eprintln!("Failed to kill process: {}", e),
+            },
+            _ => {}
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

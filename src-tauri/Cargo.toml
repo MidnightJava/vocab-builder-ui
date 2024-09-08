@@ -20,6 +20,8 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.7.0", features = [ "path-all", "shell-execute", "fs-all", "http-all", "shell-sidecar", "process-command-api", "devtools"] }
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 dotenvs = "0.1.0"
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winbase"] }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
