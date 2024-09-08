@@ -5,8 +5,8 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-use tauri::WindowEvent;
 use tauri::Manager;
+use tauri::WindowEvent;
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt; // Windows-specific
@@ -101,6 +101,4 @@ fn main() {
         })
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
-    // .run(tauri::generate_context!())
-    // .expect("error while running tauri application");
 }

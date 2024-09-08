@@ -5,7 +5,7 @@ description = "A Tauri App"
 authors = ["Mark Leone"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "vocab-builder"
 edition = "2021"
 rust-version = "1.60"
 
