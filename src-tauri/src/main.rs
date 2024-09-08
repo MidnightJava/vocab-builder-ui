@@ -93,9 +93,9 @@ fn main() {
         //     },
         //     _ => {}
         // })
-        .setup(|vocab_builder| {
+        .setup(|app| {
             println!("Setting up the app");
-            let window = vocab_builder.get_window("main").unwrap();
+            let window = app.get_window("main").unwrap();
             window.show().unwrap(); // Try explicitly showing the window
             println!("Window should be visible now");
             Ok(())
