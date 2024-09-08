@@ -72,15 +72,9 @@ fn main() {
 
     println!("Binary path: {:?}", binary_path);
 
-    let mut child_command = Command::new(binary_path.as_path());
-
-    #[cfg(windows)]
-    {
-        use winapi::um::winbase::CREATE_NO_WINDOW;
-        child_command.creation_flags(CREATE_NO_WINDOW);
-    }
-
-    let child = child_command.spawn().expect("Failed to start process");
+    let child = Command::new(binary_path.as_path())
+        .spawn()
+        .expect("Failed to start process");
 
     tauri::Builder::default()
         .on_window_event(move |event| match event.event() {
