@@ -2,7 +2,7 @@
 name = "app"
 version = "0.1.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["Mark Leone"]
 license = ""
 repository = ""
 default-run = "app"
@@ -23,10 +23,9 @@ windows_subsystem = "windows"
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-#tauri = { version = "1.7.0", features = [ "api-all", "path-all", "shell-execute", "fs-all", "http-all", "shell-sidecar", "process-command-api", "devtools"] }
+tauri = { version = "1.7.0", features = [ "api-all", "path-all", "shell-execute", "fs-all", "http-all", "shell-sidecar", "process-command-api", "devtools"] }
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 dotenvs = "0.1.0"
-tauri = { version = "1.0", features = [ "http-all", "fs-all", "shell-sidecar", "shell-execute", "path-all"] }
 
 # Add winapi dependency only for Windows
 [target.'cfg(windows)'.dependencies]
@@ -34,8 +33,12 @@ winapi = { version = "0.3" }
 
 [features]
 default = []
-windows = []
 custom-protocol = [ "tauri/custom-protocol" ]
+
+[[bin]]
+name = "vocab-builder"
+path = "./src-tauri/src/main.rs"
+windows_subsystem = "windows"
 
 #[features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

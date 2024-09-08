@@ -89,7 +89,8 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "vocab-builder",
+        "decorations": true,
+        "title": "Vocabulary Builder",
         "width": 800
       }
     ]

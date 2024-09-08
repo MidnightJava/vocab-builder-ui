@@ -91,6 +91,15 @@ fn main() {
             },
             _ => {}
         })
+        .setup(|app| {
+            println!("Setting up the app");
+            let window = app.get_window("main").unwrap();
+            window.show().unwrap(); // Try explicitly showing the window
+            println!("Window should be visible now");
+            Ok(())
+        })
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Error while running tauri application");
+    // .run(tauri::generate_context!())
+    // .expect("error while running tauri application");
 }
