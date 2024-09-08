@@ -43,7 +43,8 @@ fn main() {
     let binary_path: PathBuf;
 
     if cfg!(debug_assertions) {
-        binary_path = current_dir.join("binaries/server-x86_64-unknown-linux-gnu");
+        //temp point to windows only
+        binary_path = current_dir.join("server.exe");
     } else {
         if os == "linux" {
             binary_path = Path::new("server").to_path_buf();
