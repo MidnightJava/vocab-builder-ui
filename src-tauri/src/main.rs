@@ -80,6 +80,7 @@ fn main() {
 
     println!("Binary path: {:?}", binary_path);
 
+    #[cfg(unix)]
     let child = Command::new(binary_path.as_path())
         .spawn()
         .expect("Failed to start process");
