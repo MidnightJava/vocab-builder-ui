@@ -74,6 +74,7 @@ version = "0.1.0"
 dependencies = [
  "dotenvs",
  "fix-path-env",
+ "log",
  "serde",
  "serde_json",
  "tauri",
