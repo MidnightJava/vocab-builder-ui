@@ -57,14 +57,15 @@ fn main() {
                 println!("Bundle path: {}", bundle_path.display());
                 println!("Binary path: {}", binary_path.display());
             } else if os == "windows" {
-                binary_path = Path::new("server.exe /invisible").to_path_buf();
+                binary_path = Path::new("server.exe").to_path_buf();
             } else {
                 binary_path = Path::new("").to_path_buf();
             }
         }
         println!("Binary path: {:?}", binary_path);
 
-        let child = Command::new(binary_path.as_path())
+        let child: std::process::Child = Command::new(binary_path.as_path())
+            .args(["/invisible"])
             .spawn()
             .expect("Failed to start process");
 
