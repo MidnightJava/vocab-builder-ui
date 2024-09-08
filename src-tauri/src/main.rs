@@ -59,10 +59,17 @@ fn main() {
 
             // Windows-specific process creation with CREATE_NO_WINDOW
             #[cfg(windows)]
-            let child = Command::new(binary_path.as_path())
+            match Command::new(binary_path.as_path())
                 .creation_flags(0x08000000) // CREATE_NO_WINDOW flag for Windows
                 .spawn()
-                .expect("Failed to start process");
+            {
+                Ok(child) => {
+                    println!("Process started successfully");
+                }
+                Err(e) => {
+                    eprintln!("Failed to start process: {}", e);
+                }
+            }
 
             return; // Exit early for Windows after process creation
         } else {
