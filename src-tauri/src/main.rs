@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use env_logger;
-use log::info;
+use log::{error, info};
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -99,7 +99,7 @@ fn main() {
         //     _ => {}
         // })
         .setup(|app| {
-            log::info!("Setting up the app");
+            info!("Setting up the app");
             let window = app.get_window("main").unwrap();
             window.show().unwrap(); // Try explicitly showing the window
             info!("Window should be visible now");
