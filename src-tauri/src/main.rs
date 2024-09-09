@@ -99,7 +99,7 @@ fn main() {
         //     _ => {}
         // })
         .setup(|app| {
-            info!("Setting up the app");
+            log::info!("Setting up the app");
             let window = app.get_window("main").unwrap();
             window.show().unwrap(); // Try explicitly showing the window
             info!("Window should be visible now");

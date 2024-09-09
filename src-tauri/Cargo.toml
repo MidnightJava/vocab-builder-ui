@@ -23,7 +23,7 @@ windows_subsystem = "windows"
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.7.0", features = [ "path-all", "shell-execute", "fs-all", "http-all", "shell-sidecar", "process-command-api", "devtools"] }
+tauri = { version = "1.7.0", features = [ "path-all", "shell-execute", "fs-all", "http-all", "shell-sidecar", "process-command-api", "log", "devtools"] }
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 dotenvs = "0.1.0"
 log = "0.4"
