@@ -16,7 +16,7 @@ use std::os::windows::process::CommandExt; // Windows-specific
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
     {
-        println!("Sending INT signal to process with PID: {}", pid);
+        info!("Sending INT signal to process with PID: {}", pid);
 
         let mut kill = Command::new("kill").args(["-s", "SIGINT", &pid]).spawn()?;
         kill.wait()?;
@@ -24,7 +24,7 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(windows)]
     {
-        println!("Sending taskkill to process with PID: {}", pid);
+        info!("Sending taskkill to process with PID: {}", pid);
 
         let mut kill = Command::new("taskkill")
             .args(["/PID", &pid, "/F"])
