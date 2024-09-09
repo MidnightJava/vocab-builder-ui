@@ -44,7 +44,7 @@ fn main() {
 
     if cfg!(debug_assertions) {
         //temp point to windows only
-        binary_path = current_dir.join("server.exe");
+        binary_path = Path::new("binaries/server-x86_64-pc-windows-msvc.exe").to_path_buf();
     } else {
         if os == "linux" {
             binary_path = Path::new("server").to_path_buf();
@@ -77,7 +77,7 @@ fn main() {
                 }
             }
 
-            return; // Exit early for Windows after process creation
+            //return; // Exit early for Windows after process creation
         } else {
             binary_path = Path::new("").to_path_buf();
         }
@@ -85,7 +85,6 @@ fn main() {
 
     println!("Binary path: {:?}", binary_path);
 
-    #[cfg(unix)]
     let child = Command::new(binary_path.as_path())
         .spawn()
         .expect("Failed to start process");
