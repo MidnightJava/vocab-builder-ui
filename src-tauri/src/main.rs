@@ -16,12 +16,16 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     {
         info!("Sending INT signal to process with PID: {}", pid);
 
+        //There are two server processes. We kill the child first, then the parent
         let mut kill = Command::new("kill")
             .args(["-s", "SIGINT", "-P", &pid])
             .spawn()?;
         kill.wait()?;
         let mut kill = Command::new("kill").args(["-s", "SIGINT", &pid]).spawn()?;
         kill.wait()?;
+
+        //On MacOS, if the user quits the app without closing the app window, the servers will not be killed.
+        //So we kill all server proceeses by name when they eventually close the app window.
         let mut kill = Command::new("pkill").args(["vb_server"]).spawn()?;
         kill.wait()?;
     }
@@ -30,8 +34,15 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     {
         info!("Sending taskkill to process with PID: {}", pid);
 
+        // Kill the parent and child process
         let mut kill = Command::new("taskkill")
-            .args(["/PID", &pid, "/F"])
+            .args(["/T", "/F", "/PID", &pid])
+            .spawn()?;
+        kill.wait()?;
+
+        //Just in case, let's kill the server by name as well
+        let mut kill = Command::new("taskkill")
+            .args(["/F", "/IM", "vb_server.exe"])
             .spawn()?;
         kill.wait()?;
     }
