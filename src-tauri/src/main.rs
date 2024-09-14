@@ -9,7 +9,7 @@ use std::os::windows::process::CommandExt;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-use tauri::Manager; // Windows-specific
+use tauri::Manager;
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
@@ -79,6 +79,7 @@ fn main() {
                             Err(e) => eprintln!("Failed to kill process: {}", e),
                         }
                     }
+                    _ => {}
                 })
                 .setup(|app| {
                     info!("Setting up the app");
