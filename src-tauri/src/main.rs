@@ -11,12 +11,11 @@ use std::process::Command;
 use tauri::Manager;
 // use tauri::WindowEvent;
 #[cfg(windows)]
-use winapi::um::handleapi::CloseHandle;
+// use winapi::um::handleapi::CloseHandle;
 #[cfg(windows)]
-use winapi::um::processthreadsapi::OpenProcess;
+// use winapi::um::processthreadsapi::OpenProcess;
 #[cfg(windows)]
-use winapi::um::winnt::PROCESS_TERMINATE;
-
+// use winapi::um::winnt::PROCESS_TERMINATE;
 #[cfg(windows)]
 use std::os::windows::process::CommandExt; // Windows-specific
 
