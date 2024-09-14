@@ -4,20 +4,12 @@
 use env_logger;
 use log::info;
 use std::env;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
-// use tauri::api::process::CommandExt; // For Windows specific functionality
-use tauri::Manager;
-// use tauri::WindowEvent;
-#[cfg(windows)]
-// use winapi::um::handleapi::CloseHandle;
-#[cfg(windows)]
-// use winapi::um::processthreadsapi::OpenProcess;
-#[cfg(windows)]
-// use winapi::um::winnt::PROCESS_TERMINATE;
-#[cfg(windows)]
-use std::os::windows::process::CommandExt; // Windows-specific
+use tauri::Manager; // Windows-specific
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
@@ -87,23 +79,6 @@ fn main() {
                             Err(e) => eprintln!("Failed to kill process: {}", e),
                         }
                     }
-                    _ => {} // if let tauri::WindowEvent::Destroyed { .. } = event.event() {
-                            //     #[cfg(windows)]
-                            //     unsafe {
-                            //         let process_handle =
-                            //             OpenProcess(PROCESS_TERMINATE, 0, child_process.id() as u32);
-                            //         if !process_handle.is_null() {
-                            //             let _ = winapi::um::processthreadsapi::TerminateProcess(
-                            //                 process_handle,
-                            //                 1,
-                            //             );
-                            //             CloseHandle(process_handle);
-                            //             info!("Process killed successfully.");
-                            //         } else {
-                            //             eprintln!("Failed to get process handle.");
-                            //         }
-                            //     }
-                            // }
                 })
                 .setup(|app| {
                     info!("Setting up the app");
