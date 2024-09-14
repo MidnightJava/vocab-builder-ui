@@ -22,6 +22,8 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
         kill.wait()?;
         let mut kill = Command::new("kill").args(["-s", "SIGINT", &pid]).spawn()?;
         kill.wait()?;
+        let mut kill = Command::new("pkill").args(["vb_server"]).spawn()?;
+        kill.wait()?;
     }
 
     #[cfg(windows)]
