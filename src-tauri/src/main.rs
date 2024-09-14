@@ -75,30 +75,36 @@ fn main() {
 
             // Windows-specific process creation with CREATE_NO_WINDOW
             #[cfg(windows)]
-            let child_process = Command::new(binary_path.as_path())
+            let child: Child = Command::new(binary_path.as_path())
                 .creation_flags(0x08000000) // CREATE_NO_WINDOW flag for Windows
                 .spawn()
                 .expect("Failed to start process");
-
+            #[cfg(windows)]
             tauri::Builder::default()
-                .on_window_event(move |event| {
-                    if let tauri::WindowEvent::Destroyed { .. } = event.event() {
-                        #[cfg(windows)]
-                        unsafe {
-                            let process_handle =
-                                OpenProcess(PROCESS_TERMINATE, 0, child_process.id() as u32);
-                            if !process_handle.is_null() {
-                                let _ = winapi::um::processthreadsapi::TerminateProcess(
-                                    process_handle,
-                                    1,
-                                );
-                                CloseHandle(process_handle);
-                                info!("Process killed successfully.");
-                            } else {
-                                eprintln!("Failed to get process handle.");
-                            }
+                .on_window_event(move |event| match event.event() {
+                    tauri::WindowEvent::Destroyed { .. } => {
+                        match kill_process(&child.id().to_string()) {
+                            Ok(_) => println!("Process killed successfully."),
+                            Err(e) => eprintln!("Failed to kill process: {}", e),
                         }
                     }
+                    _ => {} // if let tauri::WindowEvent::Destroyed { .. } = event.event() {
+                            //     #[cfg(windows)]
+                            //     unsafe {
+                            //         let process_handle =
+                            //             OpenProcess(PROCESS_TERMINATE, 0, child_process.id() as u32);
+                            //         if !process_handle.is_null() {
+                            //             let _ = winapi::um::processthreadsapi::TerminateProcess(
+                            //                 process_handle,
+                            //                 1,
+                            //             );
+                            //             CloseHandle(process_handle);
+                            //             info!("Process killed successfully.");
+                            //         } else {
+                            //             eprintln!("Failed to get process handle.");
+                            //         }
+                            //     }
+                            // }
                 })
                 .setup(|app| {
                     info!("Setting up the app");
