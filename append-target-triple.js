@@ -23,7 +23,7 @@ async function main(files) {
   files.forEach(file => {
     fs.renameSync(
       `src-tauri${sep}binaries${sep}${file}${extension}`,
-      `src-tauri${sep}binaries${sep}${file}-${targetTriple}${extension}`
+      `src-tauri${sep}binaries${sep}vb_${file}-${targetTriple}${extension}`
     )
   })
 }

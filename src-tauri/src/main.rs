@@ -16,6 +16,10 @@ fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     {
         info!("Sending INT signal to process with PID: {}", pid);
 
+        let mut kill = Command::new("kill")
+            .args(["-s", "SIGINT", "-P", &pid])
+            .spawn()?;
+        kill.wait()?;
         let mut kill = Command::new("kill").args(["-s", "SIGINT", &pid]).spawn()?;
         kill.wait()?;
     }
@@ -41,27 +45,27 @@ fn main() {
 
     if cfg!(debug_assertions) {
         if os == "windows" {
-            binary_path = Path::new("binaries/server-x86_64-pc-windows-msvc.exe").to_path_buf();
+            binary_path = Path::new("binaries/vb_server-x86_64-pc-windows-msvc.exe").to_path_buf();
         } else if os == "linux" {
-            binary_path = Path::new("binaries/server-x86_64-unknown-linux-gnu").to_path_buf();
+            binary_path = Path::new("binaries/vb_server-x86_64-unknown-linux-gnu").to_path_buf();
         } else {
             // Dev build not currently supported on macos
             binary_path = Path::new("").to_path_buf();
         }
     } else {
         if os == "linux" {
-            binary_path = Path::new("server").to_path_buf();
+            binary_path = Path::new("vb_server").to_path_buf();
         } else if os == "macos" {
             let current_exe = env::current_exe().expect("Failed to get current executable path");
             let bundle_path: PathBuf = current_exe
                 .parent()
                 .expect("Failed to get bundle path")
                 .to_path_buf();
-            binary_path = bundle_path.join("server");
+            binary_path = bundle_path.join("vb_server");
             println!("Bundle path: {}", bundle_path.display());
             println!("Binary path: {}", binary_path.display());
         } else if os == "windows" {
-            binary_path = Path::new("server.exe").to_path_buf();
+            binary_path = Path::new("vb_server.exe").to_path_buf();
             println!("Binary path: {:?}", binary_path);
 
             // Windows-specific process creation with CREATE_NO_WINDOW
@@ -81,9 +85,9 @@ fn main() {
                     }
                     _ => {}
                 })
-                .setup(|app| {
+                .setup(|vocab_builder| {
                     info!("Setting up the app");
-                    let window = app.get_window("main").unwrap();
+                    let window = vocab_builder.get_window("main").unwrap();
                     window.show().unwrap();
                     info!("Window should be visible now");
                     Ok(())
@@ -109,9 +113,9 @@ fn main() {
                 },
                 _ => {}
             })
-            .setup(|app| {
+            .setup(|vocab_builder| {
                 info!("Setting up the app");
-                let window = app.get_window("main").unwrap();
+                let window = vocab_builder.get_window("main").unwrap();
                 window.show().unwrap(); // Try explicitly showing the window
                 info!("Window should be visible now");
                 Ok(())

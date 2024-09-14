@@ -1,11 +1,11 @@
 [package]
-name = "app"
+name = "vocab_builder"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["Mark Leone"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "vocab_builder"
 edition = "2021"
 rust-version = "1.60"
 
@@ -38,7 +38,7 @@ default = []
 custom-protocol = [ "tauri/custom-protocol" ]
 
 [[bin]]
-name = "app"
+name = "vocab_builder"
 path = "./src/main.rs"
 windows_subsystem = "windows"
 
