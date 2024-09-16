@@ -1,6 +1,7 @@
 <script setup>
 import { inject } from 'vue'
 const connected = inject('connected')
+const initialConnection = inject('initialConnection')
 const useFetch = async (url, method = 'GET', payload = null) => {
   const opts = { method }
   if (payload) {
@@ -9,18 +10,23 @@ const useFetch = async (url, method = 'GET', payload = null) => {
     }
     opts.body = JSON.stringify(payload)
   }
-  const res = await fetch(url, opts)
-  if (res.status != 200) {
-    return res.statusText
-  }
-  const json = await res.json()
-  if (!json || 'Error' in json) {
-    connected.value = false
-  } else {
-    connected.value = true
-  }
+  try {
+    const res = await fetch(url, opts)
 
-  return json
+    if (res.status != 200) {
+      return res.statusText
+    }
+    const json = await res.json()
+    if (!json || 'Error' in json) {
+      connected.value = false
+    } else {
+      connected.value = true
+      initialConnection.value = true
+    }
+    return json
+  } catch {
+    connected.value = false
+  }
 }
 
 const useFetch2 = async (url, method = 'GET', payload = null) => {

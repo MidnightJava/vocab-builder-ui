@@ -1,5 +1,5 @@
 <script setup>
-import { inject, computed, ref, watch } from 'vue'
+import { inject, computed, ref } from 'vue'
 import LangsTable from 'vue3-easy-data-table'
 import PartsTable from './PartsOfSpeechView.vue'
 import { usePagination } from 'use-vue3-easy-data-table'

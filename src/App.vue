@@ -5,6 +5,7 @@ import VocabTableView from './views/VocabTableView.vue'
 import FlashCardView from './views/FlashCardView.vue'
 import AvailableLanguagesView from './views/AvailableLanguagesView.vue'
 import { DEFAULT_PORT } from './main'
+import debounce from 'debounce'
 
 let currentTab = ref('Available Languages')
 
@@ -15,6 +16,7 @@ const vocab = ref(null)
 const fromLang = ref({ name: '', id: '' })
 const toLang = ref({ name: '', id: '' })
 const connected = ref(false)
+const initialConnection = ref(false)
 const lookup = ref(false)
 const minCorrect = ref(5)
 const minAge = ref(15)
@@ -23,13 +25,18 @@ const partsOfSpeech = ref([])
 const apiLookup = ref(true)
 const totalWords = ref(0)
 const host = ref('localhost')
-const retries = ref(0)
+const version = '1.0.0'
+// const retries = ref(0)
+
+const RETRY_INTERVAL_MSEC = 5000
+const BOUNCE_INTERVAL_MSEC = 2000
 
 provide('langs', langs)
 provide('vocab', vocab)
 provide('fromLang', fromLang)
 provide('toLang', toLang)
 provide('connected', connected)
+provide('initialConnection', initialConnection)
 provide('lookup', lookup)
 provide('minCorrect', minCorrect)
 provide('minAge', minAge)
@@ -42,7 +49,7 @@ provide('host', host)
 const env = import.meta.env
 /* VITE_SERVER_PORT is read directly by the frontend and
 backend. The fontend also queries the backend for the value,
-but this does not work in Windows. This superfluous query is 
+but this does not work in Windows. This superfluous query is
 left in place in case Windows supports the printenv command
 some day.
 */
@@ -50,8 +57,23 @@ const portVal = env?.VITE_SERVER_PORT
 const port = portVal ? ref(portVal) : ref(DEFAULT_PORT)
 provide('serverPort', port)
 
+const checkConnection = async () => {
+  if (!connected.value) {
+    await init(fromLang.value, toLang.value)
+  }
+}
+
+const checkServerIsAlive = async () => {
+  await useFetch.value.fetch(`http://${host.value}:${port.value}/alive`, 'GET')
+}
+
+setInterval(checkServerIsAlive, RETRY_INTERVAL_MSEC)
+
+setInterval(checkConnection, RETRY_INTERVAL_MSEC)
+
 try {
   const Command = window.__TAURI__.shell.Command
+  //Read an env variable from the Rust backend
   const readEnvVariable = async variableName => {
     const commandResult = await new Command('printenv', variableName).execute()
     if (commandResult.code !== 0) {
@@ -83,42 +105,49 @@ const selectWords = async () => {
   totalWords.value = Number(res?.Result)
 }
 
-const init = async (fromLang = fromLang.value, toLang = toLang.value) => {
-  await useFetch.value
-    .fetch(
-      `http://${host.value}:${port.value}/init?from_lang=${fromLang.id}&to_lang=${toLang.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
-      'GET'
-    )
-    .catch(err => console.log(`Init error: ${err.message}`))
-  let res = await useFetch.value
-    .fetch(`http://${host.value}:${port.value}/languages/get`, 'GET')
-    .catch(err => console.log(`Init error: ${err.message}`))
-  langs.value = res
-  if (!Object.keys(defLangs?.value || {})?.length) {
-    res = await useFetch.value
-      .fetch(`http://${host.value}:${port.value}/languages/get_defaults`)
+const init = debounce(
+  async (fromLang = fromLang?.value, toLang = toLang?.value) => {
+    await useFetch.value
+      .fetch(
+        `http://${host.value}:${port.value}/init?from_lang=${fromLang?.id}&to_lang=${toLang?.id}&min_correct=${minCorrect.value}&min_age=${minAge.value}&part_of_speech=${partOfSpeech.value}`,
+        'GET'
+      )
       .catch(err => console.log(`Init error: ${err.message}`))
-    defLangs.value = res
-    res = await useFetch.value
-      .fetch(`http://${host.value}:${port.value}/vocab/get_all`)
-      .catch(err => console.log(`Init error: ${err.message}`))
-    vocab.value = res
-  } else {
-    res = await useFetch.value
-      .fetch(`http://${host.value}:${port.value}/vocab/get_all`)
-      .catch(err => console.log(`Init error: ${err.message}`))
-    vocab.value = res
-  }
-  selectWords()
+    let res = await useFetch.value
+      .fetch(`http://${host.value}:${port.value}/languages/get`, 'GET')
+      .catch(err => console.log(`Init error: Get Languages: ${err.message}`))
+    langs.value = res
+    if (!Object.keys(defLangs?.value || {})?.length) {
+      res = await useFetch.value
+        .fetch(`http://${host.value}:${port.value}/languages/get_defaults`)
+        .catch(err =>
+          console.log(`Init error: Get Default Languages: ${err.message}`)
+        )
+      defLangs.value = res
+      res = await useFetch.value
+        .fetch(`http://${host.value}:${port.value}/vocab/get_all`)
+        .catch(err => console.log(`Init error: Get Vocabulary ${err.message}`))
+      vocab.value = res
+    } else {
+      res = await useFetch.value
+        .fetch(`http://${host.value}:${port.value}/vocab/get_all`)
+        .catch(err => console.log(`Init error: Get Languages${err.message}`))
+      vocab.value = res
+    }
+    selectWords()
 
-  getPartsOfSpeech()
-  currentTab.value = 'Available Languages'
-}
+    getPartsOfSpeech()
+    currentTab.value = 'Available Languages'
+  },
+  BOUNCE_INTERVAL_MSEC
+)
 
 const getPartsOfSpeech = async () => {
   const res = await useFetch.value
     .fetch(`http://${host.value}:${port.value}/partsofspeech/get`, 'GET')
-    .catch(err => console.log(`Get parts of speech error: ${err.message}`))
+    .catch(err => {
+      console.log(`Get parts of speech error: ${err.message}`)
+    })
   partsOfSpeech.value = res
 }
 
@@ -192,11 +221,18 @@ watchEffect(async () => {
     init(fromLang.value, toLang.value)
   }
 })
+
+const connectionStatusMessage = () => {
+  return initialConnection.value
+    ? 'Reconnecting to server...'
+    : 'Looking for server...'
+}
 </script>
 
 <template>
   <UseFetch ref="useFetch" />
   <div id="top-level-app">
+    <div class="version-text">Version {{ version }}</div>
     <div class="top-nav">
       <button
         v-for="tab in tabs"
@@ -210,9 +246,9 @@ watchEffect(async () => {
     <KeepAlive>
       <component v-bind:is="currentTabComponent"></component>
     </KeepAlive>
-    <div class="reconnect-panel" v-if="!connected">
-      <div class="reconnect-label">Lost server connection</div>
-      <button
+    <div class="server-status-panel" v-if="!connected">
+      <div class="server-status-label">{{ connectionStatusMessage() }}</div>
+      <!-- {<button
         class="reconnect-button"
         @click="
           () => {
@@ -225,19 +261,19 @@ watchEffect(async () => {
           }
         "
       >
-        Reconnect
-      </button>
+        Reconnect</button
+      >} -->
     </div>
-    <div v-if="retries > 1" class="retry-label">
+    <!-- {<div v-if="retries > 1" class="retry-label">
       Check the application log. Perhaps the port is already in use. Either stop
       the process that is using the port identified in the log or set the
       environment variable SEVER_PORT to point to an available port.
-    </div>
+    </div>} -->
   </div>
 </template>
 
 <style scoped>
-.reconnect-panel {
+.server-status-panel {
   display: flex;
   flex-direction: row;
   margin-top: 10px;
@@ -248,7 +284,7 @@ watchEffect(async () => {
   border-radius: 3px;
   color: blue;
 }
-.reconnect-label {
+.server-status-label {
   margin-top: auto;
   color: red;
 }
@@ -286,6 +322,15 @@ watchEffect(async () => {
 }
 
 .top-nav {
-  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.version-text {
+  font-size: 0.8rem;
+  color: grey;
+  vertical-align: middle;
+  margin-left: 95%;
 }
 </style>
