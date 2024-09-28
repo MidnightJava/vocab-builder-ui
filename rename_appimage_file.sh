@@ -8,10 +8,10 @@ CENTOS_APPIMAGE_FILE="vocab-builder_${VERSION}_amd64.AppImage"
 UBUNTU_APPIMAGE_FILE="vocab-builder_${VERSION}_amd64.AppImage"
 
 function get_distro() {
-  if [ -f /etc/lsb-release ]; then
+  if [[ -e /etc/lsb-release ]]; then
     DISTRO="ubuntu"
-  elif [ -f /etc/redhat-release ]; then
-    DISTRO="centOS"
+  elif [[ -e /etc/redhat-release ]]; then
+    DISTRO="centos"
   else
     echo Unknown OS Distro. Exiting...
     exit
@@ -20,7 +20,6 @@ function get_distro() {
 }
 
 distro=$(get_distro)
-
 if [[ "${distro}" = "ubuntu" ]];then
   echo Ubuntu detected
   old_file_name=${UBUNTU_APPIMAGE_FILE}
