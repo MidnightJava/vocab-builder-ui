@@ -25,7 +25,7 @@ const partsOfSpeech = ref([])
 const apiLookup = ref(true)
 const totalWords = ref(0)
 const host = ref('localhost')
-const version = '1.0.0'
+const version = '1.0.1'
 // const retries = ref(0)
 
 const RETRY_INTERVAL_MSEC = 5000
