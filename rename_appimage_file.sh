@@ -7,15 +7,13 @@ APPIMAGE_PATH="$script_dir/src-tauri/target/release/bundle/appimage"
 CENTOS_APPIMAGE_FILE="vocab-builder_${VERSION}_amd64.AppImage"
 UBUNTU_APPIMAGE_FILE="vocab-builder_${VERSION}_amd64.AppImage"
 
-
-echo $script_dir
 function get_distro() {
   if [ -f /etc/lsb-release ]; then
     DISTRO="ubuntu"
   elif [ -f /etc/redhat-release ]; then
     DISTRO="centOS"
   else
-    echo Unknown distro. Exiting...
+    echo Unknown OS Distro. Exiting...
     exit
   fi
   echo $DISTRO
@@ -23,14 +21,15 @@ function get_distro() {
 
 distro=$(get_distro)
 
-if [[ "${distro}" -eq "ubuntu" ]];then
-  echo The release is Ubuntu
+if [[ "${distro}" = "ubuntu" ]];then
+  echo Ubuntu detected
   old_file_name=${UBUNTU_APPIMAGE_FILE}
-elif [[ "${distro}" -eq "centos" ]];then
-  echo The release is CentOS
+elif [[ "${distro}" = "centos" ]];then
+  echo CentOS detected
   old_file_name=${CENTOS_APPIMAGE_FILE}
 else
-  echo Unknown release
+  echo Unknown OS Distro. Exiting...
+  exit
 fi
 
 new_file_name="vocab-builder_${VERSION}_${distro}_amd64.AppImage"
