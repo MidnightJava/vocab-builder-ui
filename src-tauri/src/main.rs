@@ -10,6 +10,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::Manager;
+use tauri::{LogicalSize, Size};
 
 fn kill_process(pid: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(unix)]
@@ -102,6 +103,12 @@ fn main() {
                     info!("Setting up the app");
                     let window = vocab_builder.get_window("main").unwrap();
                     window.show().unwrap();
+                    window
+                        .set_size(Size::Logical(LogicalSize {
+                            width: 1400.0,
+                            height: 900.0,
+                        }))
+                        .unwrap();
                     info!("Window should be visible now");
                     Ok(())
                 })
@@ -129,7 +136,13 @@ fn main() {
             .setup(|vocab_builder| {
                 info!("Setting up the app");
                 let window = vocab_builder.get_window("main").unwrap();
-                window.show().unwrap(); // Try explicitly showing the window
+                window.show().unwrap();
+                window
+                    .set_size(Size::Logical(LogicalSize {
+                        width: 1400.0,
+                        height: 900.0,
+                    }))
+                    .unwrap();
                 info!("Window should be visible now");
                 Ok(())
             })
