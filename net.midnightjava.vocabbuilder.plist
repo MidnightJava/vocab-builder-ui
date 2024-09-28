@@ -4,12 +4,17 @@
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.example.env.variable</string>
+    <string>net.midnightjava.vocabbuilder</string>
+
     <key>ProgramArguments</key>
     <array>
-      <string>/bin/sh</string>
-      <string>-c</string>
-      <string>launchctl setenv VITE_SERVER_PORT 5044</string>
+      <string>/bin/launchctl</string>
+      <string>setenv</string>
+      <string>VITE_SERVER_PORT</string>
+      <string>5088</string>
     </array>
+
+    <key>RunAtLoad</key>
+    <true/>
   </dict>
 </plist>
