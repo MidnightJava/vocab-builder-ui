@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "vocab_builder",
-    "version": "0.1.0"
+    "version": "1.0.1"
   },
   "plugins": {
     "shell": {
@@ -87,11 +87,11 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 900,
         "resizable": true,
         "decorations": true,
         "title": "Vocabulary Builder",
-        "width": 800
+        "width": 1400
       }
     ]
   }

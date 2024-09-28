@@ -1,4 +1,5 @@
 #!/bin/bash
+# No longer needed, since we use pyinstaller one-file build
 APPIMAGE_PATH="src-tauri/target/release/bundle/appimage"
 APPIMAGE_FILE="vocab-builder_0.1.0_amd64.AppImage"
 APPIMAGE_TOOL="appimagetool-x86_64.AppImage"
