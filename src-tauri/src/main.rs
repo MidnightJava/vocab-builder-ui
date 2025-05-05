@@ -105,7 +105,7 @@ fn main() {
                     window.show().unwrap();
                     window
                         .set_size(Size::Logical(LogicalSize {
-                            width: 1400.0,
+                            width: 1600.0,
                             height: 900.0,
                         }))
                         .unwrap();
@@ -139,7 +139,7 @@ fn main() {
                 window.show().unwrap();
                 window
                     .set_size(Size::Logical(LogicalSize {
-                        width: 1400.0,
+                        width: 1600.0,
                         height: 900.0,
                     }))
                     .unwrap();
