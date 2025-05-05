@@ -64,6 +64,7 @@ const checkConnection = async () => {
 }
 
 const checkServerIsAlive = async () => {
+  //useFecth function sets connected.value per results of REST call
   await useFetch.value.fetch(`http://${host.value}:${port.value}/alive`, 'GET')
 }
 
@@ -217,7 +218,7 @@ watch(apiLookup, async newVal => {
 })
 
 watchEffect(async () => {
-  if (port.value) {
+  if (port.value && defLangs.value) {
     init(fromLang.value, toLang.value)
   }
 })

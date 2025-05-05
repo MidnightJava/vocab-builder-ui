@@ -14,6 +14,7 @@ const useFetch = async (url, method = 'GET', payload = null) => {
     const res = await fetch(url, opts)
 
     if (res.status != 200) {
+      connected.value = false //Added May 4.2025 make sure it doesn't break something
       return res.statusText
     }
     const json = await res.json()

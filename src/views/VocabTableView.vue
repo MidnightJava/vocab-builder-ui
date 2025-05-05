@@ -154,7 +154,7 @@ const deleteSelected = async () => {
   const res = await useFetch(`http://${host.value}:${port.value}/vocab/get_all`)
   vocab.value = res
   itemsSelected.value = []
-  vocab.value = res
+  // vocab.value = res
 }
 
 const deleteEntry = async item => {
