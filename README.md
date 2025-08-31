@@ -28,7 +28,7 @@ Point your web browser to http://localhost:5173
 
 ### To Build the Tauri App
 
-#### Install Tauri and itialize it
+#### Install Tauri and initialize it
 
 ```
 1. Install Rust (see https://tauri.app/v1/guides/getting-started/prerequisites)
