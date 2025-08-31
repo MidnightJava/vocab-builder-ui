@@ -27,5 +27,6 @@ coverage
 *.sln
 *.sw?
 
-data
+/data/
+!src-tauri/data
 api_key
